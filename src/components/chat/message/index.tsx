@@ -1,11 +1,8 @@
-import { RGBA, SyntaxStyle } from "@opentui/core";
 import {
   AssistantThreadMessageRole,
   type AssistantThreadMessage,
 } from "../../../lib/data/kagiClient";
 import Markdown from "../../Markdown";
-
-const syntaxStyle = SyntaxStyle.fromTheme([]);
 
 const ChatMessageComponent = ({
   message,
@@ -36,7 +33,7 @@ const ChatMessageComponent = ({
           border={message.role === AssistantThreadMessageRole.USER}
         >
           {message.role === AssistantThreadMessageRole.USER ? (
-            <text width="100%">{message.content.substring(0, 500)}</text>
+            <text width="100%">{message.content}</text>
           ) : (
             <Markdown content={message.markdownContent || "*Empty message*"} />
           )}

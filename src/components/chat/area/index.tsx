@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import type { ScrollBoxRenderable } from "@opentui/core";
 import {
   AssistantThreadMessageRole,
@@ -6,6 +6,7 @@ import {
   type MessageDto,
 } from "../../../lib/data/kagiClient";
 import { useAppContext } from "../../..";
+import { useKeyboard } from "@opentui/react";
 import ChatMessageComponent from "../message";
 import MessageBar from "../bar/MessageBar";
 
@@ -13,6 +14,23 @@ const ChatArea = () => {
   const { client, currentThreadId, messagesBoxFocused, messages, setMessages } =
     useAppContext();
   const scrollboxRef = useRef<ScrollBoxRenderable>(null);
+  const lastGPressTime = useRef<number>(0);
+  const G_TIMEOUT = 500; // Time window in ms for "gg" detection
+
+  const scrollToBottom = useCallback(() => {
+    if (scrollboxRef.current) {
+      scrollboxRef.current.scrollTo({
+        x: 0,
+        y: scrollboxRef.current.scrollHeight,
+      });
+    }
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    if (scrollboxRef.current) {
+      scrollboxRef.current.scrollTo({ x: 0, y: 0 });
+    }
+  }, []);
 
   const loadThread = async () => {
     setMessages([]);
@@ -69,13 +87,31 @@ const ChatArea = () => {
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    if (messages.length > 0 && scrollboxRef.current) {
-      scrollboxRef.current.scrollTo({
-        x: 0,
-        y: scrollboxRef.current.scrollHeight,
-      });
+    if (messages.length > 0) {
+      scrollToBottom();
     }
-  }, [messages]);
+  }, [messages, scrollToBottom]);
+
+  // Handle keyboard shortcuts for scrolling
+  useKeyboard((key) => {
+    if (!messagesBoxFocused) return;
+
+    if (key.name === "g") {
+      const now = Date.now();
+      const timeSinceLastG = now - lastGPressTime.current;
+
+      if (timeSinceLastG < G_TIMEOUT) {
+        // Double press "gg" - scroll to top
+        scrollToTop();
+        lastGPressTime.current = 0;
+      } else {
+        // First press - record time
+        lastGPressTime.current = now;
+        // Also scroll to bottom on single G press (vim-like behavior)
+        scrollToBottom();
+      }
+    }
+  });
 
   return (
     <box

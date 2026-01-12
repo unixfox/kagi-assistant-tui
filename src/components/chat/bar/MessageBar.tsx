@@ -9,6 +9,7 @@ import {
   type Citation,
   type MessageDto,
 } from "../../../lib/data/kagiClient";
+import type { SubmitEvent } from "@opentui/core";
 
 // --- Helper Functions ---
 
@@ -231,33 +232,35 @@ const MessageBar = () => {
       }
     } catch (e) {
       console.error("Error sending message:", e);
-      // Optional: Add error state handling here
     }
   };
 
-  useKeyboard((key) => {
-    if (key.name === "return" && key.ctrl) {
-      const value = textareaRef.current?.plainText;
+  const handleSubmit = (e: SubmitEvent) => {
+    const value = textareaRef.current?.plainText;
 
-      if (value === "/model") {
-        setShowModelSelectorModal(true);
-      } else if (value === "/new") {
-        setCurrentThreadId(null);
-        setMessages([]); // Clear local messages for new chat
-      } else {
-        // Call the implementation
-        handleSendMessage(value);
-      }
-
-      textareaRef.current?.clear();
+    if (value === "/model") {
+      setShowModelSelectorModal(true);
+    } else if (value === "/new") {
+      setCurrentThreadId(null);
+      setMessages([]); // Clear local messages for new chat
+    } else {
+      // Call the implementation
+      handleSendMessage(value);
     }
-  });
+
+    textareaRef.current?.clear();
+  };
 
   return (
     <box marginBottom={1}>
       <box backgroundColor="#222436" flexDirection="row" gap={1} padding={1}>
         <box height="100%" width={1} backgroundColor="#C098FF" />
         <textarea
+          keyBindings={[
+            { name: "return", action: "submit" },
+            { name: "return", shift: true, action: "newline" },
+          ]}
+          onSubmit={handleSubmit}
           ref={textareaRef}
           width="100%"
           minHeight={5}
