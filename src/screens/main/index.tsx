@@ -9,7 +9,7 @@ const MainScreen = () => {
         height="100%"
         width="100%"
         flexDirection="row"
-        backgroundColor={"#18181A"}
+        backgroundColor={"#1A1B26"}
       >
         <ChatSidebar />
         <ChatArea />

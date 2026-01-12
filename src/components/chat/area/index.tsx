@@ -6,6 +6,7 @@ import {
 } from "../../../lib/data/kagiClient";
 import { useAppContext } from "../../..";
 import ChatMessageComponent from "../message";
+import MessageBar from "../bar/MessageBar";
 
 const ChatArea = () => {
   const { client, currentThreadId } = useAppContext();
@@ -64,15 +65,17 @@ const ChatArea = () => {
       height="100%"
       width="100%"
       flexGrow={1}
-      border
+      // border
       paddingLeft={3}
       paddingRight={3}
+      flexDirection="column"
     >
       <scrollbox height="100%" width="100%">
         {messages.map((msg) => (
           <ChatMessageComponent message={msg} key={msg.id} />
         ))}
       </scrollbox>
+      <MessageBar />
     </box>
   );
 };

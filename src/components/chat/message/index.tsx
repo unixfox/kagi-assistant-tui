@@ -13,7 +13,7 @@ const ChatMessageComponent = ({
   message: AssistantThreadMessage;
 }) => {
   return (
-    <box width="100%" flexDirection="column">
+    <box width="100%" flexDirection="column" padding={1}>
       <box
         width="100%"
         flexDirection="row"
@@ -35,13 +35,6 @@ const ChatMessageComponent = ({
           padding={1}
           border={message.role === AssistantThreadMessageRole.USER}
         >
-          {/*<text width="100%">{message.markdownContent}</text>*/}
-          {/*<code
-            drawUnstyledText={false}
-            content={message.markdownContent!}
-            filetype="markdown"
-            syntaxStyle={syntaxStyle}
-          />*/}
           {message.role === AssistantThreadMessageRole.USER ? (
             <text width="100%">{message.content.substring(0, 500)}</text>
           ) : (

@@ -5,7 +5,8 @@ import { useKeyboard } from "@opentui/react";
 import ThreadItem from "./ThreadItem";
 
 const ChatSidebar = () => {
-  const { client, setCurrentThreadId, currentThreadId } = useAppContext();
+  const { client, setCurrentThreadId, currentThreadId, messageBarFocused } =
+    useAppContext();
 
   const [threads, setThreads] = useState<Record<
     string,
@@ -21,18 +22,12 @@ const ChatSidebar = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (!threads) return;
-
-  //   console.log(threads);
-  // }, [threads]);
-
   // Flatten threads for navigation
   const flatThreads = threads ? Object.values(threads).flat() : [];
 
   // Handle keyboard navigation for thread selection
   useKeyboard((key) => {
-    if (!flatThreads.length) return;
+    if (!flatThreads.length || messageBarFocused) return;
 
     if (key.name === "up") {
       setFocusedThreadIndex((prev) => Math.max(0, prev - 1));
@@ -53,9 +48,18 @@ const ChatSidebar = () => {
   }, []);
 
   return (
-    <box height="100%" width="25%" border flexDirection="column">
+    <box
+      height="100%"
+      width="25%"
+      flexDirection="column"
+      backgroundColor="#222436"
+    >
+      <box paddingLeft={1} paddingTop={1}>
+        <ascii-font font="tiny" text="Kagi" />
+      </box>
+
       {threads ? (
-        <scrollbox style={{ flexGrow: 1 }}>
+        <scrollbox height="100%" paddingTop={1}>
           {Object.entries(threads).map(([category, threadList]) => (
             <box key={category} flexDirection="column" style={{ padding: 1 }}>
               <text style={{ marginBottom: 1 }}>{category}</text>

@@ -24,6 +24,9 @@ export interface AppContextProps {
   client: AssistantClient;
   currentThreadId: string | null;
   setCurrentThreadId: Dispatch<SetStateAction<string | null>>;
+
+  messageBarFocused: boolean;
+  setMessageBarFocused: Dispatch<SetStateAction<boolean>>;
 }
 
 const AppContext = createContext<AppContextProps>({} as AppContextProps);
@@ -34,6 +37,7 @@ function App() {
   const [screen, setScreen] = useState(Screen.Pending);
   const [client, setClient] = useState<AssistantClient | null>(null);
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
+  const [messageBarFocused, setMessageBarFocused] = useState(false);
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -61,7 +65,13 @@ function App() {
       {screen === Screen.Onboarding && <Onboarding />}
       {screen === Screen.Main && client && (
         <AppContext.Provider
-          value={{ client, currentThreadId, setCurrentThreadId }}
+          value={{
+            client,
+            currentThreadId,
+            setCurrentThreadId,
+            messageBarFocused,
+            setMessageBarFocused,
+          }}
         >
           <MainScreen />
         </AppContext.Provider>
