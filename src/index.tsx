@@ -1,5 +1,5 @@
 import { createCliRenderer, TextAttributes } from "@opentui/core";
-import { createRoot } from "@opentui/react";
+import { createRoot, useKeyboard } from "@opentui/react";
 import Onboarding from "./screens/onboarding";
 import {
   createContext,
@@ -90,6 +90,35 @@ function App() {
     setSelectedProfile(JSON.parse(selectedProfile));
   }, []);
 
+  useKeyboard((key) => {
+    const { name, ctrl } = key;
+
+    // Ctrl + X – unfocus everything (sidebar becomes active)
+    if (name === "x" && ctrl) {
+      setMessageBarFocused(false);
+      setMessagesBoxFocused(false);
+      return;
+    }
+
+    // Ctrl + G – toggle MessagesBox focus
+    if (name === "g" && ctrl) {
+      setMessagesBoxFocused((v) => !v);
+      return setMessageBarFocused(false);
+    }
+
+    // Ctrl + T – toggle MessageBar focus
+    if (name === "t" && ctrl) {
+      setMessageBarFocused((v) => !v);
+      return setMessagesBoxFocused(false);
+    }
+
+    // "/" – focus MessageBar (unless already focused)
+    if (name === "/" && !messageBarFocused) {
+      setMessageBarFocused(true);
+      return setMessagesBoxFocused(false);
+    }
+  });
+
   return (
     <>
       {screen === Screen.Pending && <></>}
@@ -122,6 +151,6 @@ function App() {
 const renderer = await createCliRenderer({
   targetFps: 30,
 });
-renderer.console.toggle();
+// renderer.console.toggle();
 
 createRoot(renderer).render(<App />);

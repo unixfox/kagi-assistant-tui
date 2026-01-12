@@ -20,13 +20,6 @@ const ChatArea = () => {
     setMessages,
   } = useAppContext();
 
-  useKeyboard((key) => {
-    if (key.name === "g" && key.ctrl) {
-      setMessagesBoxFocused((val) => !val);
-      setMessageBarFocused(false);
-    }
-  });
-
   const loadThread = async () => {
     setMessages([]);
     try {

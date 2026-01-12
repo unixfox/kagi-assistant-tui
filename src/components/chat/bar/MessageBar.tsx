@@ -236,16 +236,6 @@ const MessageBar = () => {
   };
 
   useKeyboard((key) => {
-    if (key.name === "t" && key.ctrl) {
-      setMessageBarFocused((val) => !val);
-      setMessagesBoxFocused(false);
-    }
-
-    if (key.name === "/" && !messageBarFocused) {
-      setMessageBarFocused(true);
-      setMessagesBoxFocused(false);
-    }
-
     if (key.name === "return" && key.ctrl) {
       const value = textareaRef.current?.plainText;
 
