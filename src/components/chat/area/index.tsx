@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import type { ScrollBoxRenderable } from "@opentui/core";
 import {
   AssistantThreadMessageRole,
   type AssistantThreadMessage,
@@ -7,18 +8,11 @@ import {
 import { useAppContext } from "../../..";
 import ChatMessageComponent from "../message";
 import MessageBar from "../bar/MessageBar";
-import { useKeyboard } from "@opentui/react";
 
 const ChatArea = () => {
-  const {
-    client,
-    currentThreadId,
-    messagesBoxFocused,
-    setMessagesBoxFocused,
-    setMessageBarFocused,
-    messages,
-    setMessages,
-  } = useAppContext();
+  const { client, currentThreadId, messagesBoxFocused, messages, setMessages } =
+    useAppContext();
+  const scrollboxRef = useRef<ScrollBoxRenderable>(null);
 
   const loadThread = async () => {
     setMessages([]);
@@ -73,6 +67,16 @@ const ChatArea = () => {
     loadThread();
   }, [currentThreadId]);
 
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messages.length > 0 && scrollboxRef.current) {
+      scrollboxRef.current.scrollTo({
+        x: 0,
+        y: scrollboxRef.current.scrollHeight,
+      });
+    }
+  }, [messages]);
+
   return (
     <box
       height="100%"
@@ -83,7 +87,12 @@ const ChatArea = () => {
       paddingRight={3}
       flexDirection="column"
     >
-      <scrollbox height="100%" width="100%" focused={messagesBoxFocused}>
+      <scrollbox
+        ref={scrollboxRef}
+        height="100%"
+        width="100%"
+        focused={messagesBoxFocused}
+      >
         {messages.map((msg) => (
           <ChatMessageComponent message={msg} key={msg.id} />
         ))}
