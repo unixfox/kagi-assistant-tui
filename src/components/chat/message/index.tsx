@@ -38,7 +38,7 @@ const ChatMessageComponent = ({
           {message.role === AssistantThreadMessageRole.USER ? (
             <text width="100%">{message.content.substring(0, 500)}</text>
           ) : (
-            <Markdown content={message.markdownContent!} />
+            <Markdown content={message.markdownContent || "*Empty message*"} />
           )}
         </box>
       </box>

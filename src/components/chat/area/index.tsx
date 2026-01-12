@@ -16,9 +16,9 @@ const ChatArea = () => {
     messagesBoxFocused,
     setMessagesBoxFocused,
     setMessageBarFocused,
+    messages,
+    setMessages,
   } = useAppContext();
-
-  const [messages, setMessages] = useState<AssistantThreadMessage[]>([]);
 
   useKeyboard((key) => {
     if (key.name === "g" && key.ctrl) {
@@ -71,6 +71,10 @@ const ChatArea = () => {
   };
 
   useEffect(() => {
+    if (currentThreadId === null) {
+      setMessages([]);
+      return;
+    }
     loadThread();
   }, [currentThreadId]);
 

@@ -60,7 +60,7 @@ export interface AssistantThreadMessageDocument {
 export interface KagiPromptRequest {
   focus: {
     thread_id: string | null;
-    message_id: string | null;
+    message_id?: string | null;
     prompt: string;
     branch_id: string | null;
   };
@@ -108,6 +108,7 @@ export interface AssistantProfile {
   avatar: string; // url
   color: string;
   family: string;
+  model: string;
   // Add other fields as necessary from the JSON response
 }
 

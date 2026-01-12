@@ -11,7 +11,11 @@ import {
 } from "react";
 import MainScreen from "./screens/main";
 import { Keychain } from "./lib/data/keychain";
-import { AssistantClient, AssistantProfile } from "./lib/data/kagiClient";
+import {
+  AssistantClient,
+  type AssistantProfile,
+  type AssistantThreadMessage,
+} from "./lib/data/kagiClient";
 
 enum Screen {
   Pending,
@@ -36,6 +40,9 @@ export interface AppContextProps {
 
   messagesBoxFocused: boolean;
   setMessagesBoxFocused: Dispatch<SetStateAction<boolean>>;
+
+  messages: AssistantThreadMessage[];
+  setMessages: Dispatch<SetStateAction<AssistantThreadMessage[]>>;
 }
 
 const AppContext = createContext<AppContextProps>({} as AppContextProps);
@@ -51,6 +58,7 @@ function App() {
   const [selectedProfile, setSelectedProfile] =
     useState<AssistantProfile | null>(null);
   const [messagesBoxFocused, setMessagesBoxFocused] = useState(false);
+  const [messages, setMessages] = useState<AssistantThreadMessage[]>([]);
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -90,6 +98,8 @@ function App() {
             setSelectedProfile,
             messagesBoxFocused,
             setMessagesBoxFocused,
+            messages,
+            setMessages,
           }}
         >
           <MainScreen />
@@ -102,6 +112,6 @@ function App() {
 const renderer = await createCliRenderer({
   targetFps: 30,
 });
-// renderer.console.toggle();
+renderer.console.toggle();
 
 createRoot(renderer).render(<App />);
