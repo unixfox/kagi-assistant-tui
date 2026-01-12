@@ -21,11 +21,11 @@ const ChatSidebar = () => {
     }
   };
 
-  useEffect(() => {
-    if (!threads) return;
+  // useEffect(() => {
+  //   if (!threads) return;
 
-    console.log(threads);
-  }, [threads]);
+  //   console.log(threads);
+  // }, [threads]);
 
   // Flatten threads for navigation
   const flatThreads = threads ? Object.values(threads).flat() : [];

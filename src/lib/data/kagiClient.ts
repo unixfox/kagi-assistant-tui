@@ -31,6 +31,25 @@ export interface AssistantThreadMessage {
   metadata?: Record<string, string>;
 }
 
+export interface MessageDto {
+  id: string;
+  prompt?: string;
+  reply?: string;
+  documents?: DocumentDto[];
+  branch_list?: string[];
+  references_html?: string;
+  md?: string | null;
+  metadata?: string;
+  state?: string;
+}
+
+export interface DocumentDto {
+  id: string;
+  name: string;
+  mime: string;
+  data?: string | null;
+}
+
 export interface AssistantThreadMessageDocument {
   id: string;
   name: string;
@@ -340,6 +359,8 @@ export class AssistantClient {
     extraHeaders: Record<string, string> = {},
   ): AsyncGenerator<StreamChunk> {
     const reqHeaders = { ...this.headers, ...extraHeaders };
+
+    console.log(reqHeaders);
 
     const response = await fetch(url, {
       method: method,
