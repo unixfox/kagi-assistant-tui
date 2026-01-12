@@ -28,6 +28,7 @@ const ChatArea = () => {
   });
 
   const loadThread = async () => {
+    setMessages([]);
     try {
       const stream = client.fetchStream(
         "https://kagi.com/assistant/thread_open",
@@ -42,6 +43,7 @@ const ChatArea = () => {
 
           for (const dto of dtos) {
             setMessages((prev) => [
+              ...prev,
               {
                 id: dto.id,
                 content: dto.prompt,

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { type AssistantProfile } from "../../lib/data/kagiClient";
-import { useAppContext } from "../..";
+import { prefs, useAppContext } from "../..";
 
 const ModelSelectorModal = ({ show }: { show: boolean }) => {
   const { client, setSelectedProfile, setShowModelSelectorModal } =
@@ -61,6 +61,11 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
 
           setSelectedProfile(selected);
           setShowModelSelectorModal(false);
+
+          prefs.set("selected_profile", JSON.stringify(selected));
+          prefs.save().then(() => {
+            "selected profile saved to prefs";
+          });
         }}
         showScrollIndicator
         options={options}

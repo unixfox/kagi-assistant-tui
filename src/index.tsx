@@ -16,6 +16,7 @@ import {
   type AssistantProfile,
   type AssistantThreadMessage,
 } from "./lib/data/kagiClient";
+import { initPreferences, UserPreferences } from "./lib/data/preferences";
 
 enum Screen {
   Pending,
@@ -49,6 +50,8 @@ const AppContext = createContext<AppContextProps>({} as AppContextProps);
 
 export const useAppContext = () => useContext(AppContext);
 
+export const prefs = await initPreferences();
+
 function App() {
   const [screen, setScreen] = useState(Screen.Pending);
   const [client, setClient] = useState<AssistantClient | null>(null);
@@ -78,6 +81,13 @@ function App() {
 
   useEffect(() => {
     checkStateForScreen();
+  }, []);
+
+  useEffect(() => {
+    const selectedProfile: string | null = prefs.get("selected_profile", null);
+    if (selectedProfile === null) return;
+    console.log(selectedProfile);
+    setSelectedProfile(JSON.parse(selectedProfile));
   }, []);
 
   return (
