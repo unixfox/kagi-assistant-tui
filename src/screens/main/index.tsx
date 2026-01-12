@@ -1,8 +1,10 @@
+import { useAppContext } from "../..";
 import ChatArea from "../../components/chat/area";
 import ChatSidebar from "../../components/chat/sidebar";
-import type { AssistantClient } from "../../lib/data/kagiClient";
+import ModelSelectorModal from "../../components/modals/ModelSelectorModal";
 
 const MainScreen = () => {
+  const { showModelSelectorModal } = useAppContext();
   return (
     <>
       <box
@@ -11,6 +13,7 @@ const MainScreen = () => {
         flexDirection="row"
         backgroundColor={"#1A1B26"}
       >
+        <ModelSelectorModal show={showModelSelectorModal} />
         <ChatSidebar />
         <ChatArea />
       </box>

@@ -11,7 +11,7 @@ import {
 } from "react";
 import MainScreen from "./screens/main";
 import { Keychain } from "./lib/data/keychain";
-import { AssistantClient } from "./lib/data/kagiClient";
+import { AssistantClient, AssistantProfile } from "./lib/data/kagiClient";
 
 enum Screen {
   Pending,
@@ -27,6 +27,15 @@ export interface AppContextProps {
 
   messageBarFocused: boolean;
   setMessageBarFocused: Dispatch<SetStateAction<boolean>>;
+
+  showModelSelectorModal: boolean;
+  setShowModelSelectorModal: Dispatch<SetStateAction<boolean>>;
+
+  selectedProfile: AssistantProfile | null;
+  setSelectedProfile: Dispatch<SetStateAction<AssistantProfile | null>>;
+
+  messagesBoxFocused: boolean;
+  setMessagesBoxFocused: Dispatch<SetStateAction<boolean>>;
 }
 
 const AppContext = createContext<AppContextProps>({} as AppContextProps);
@@ -38,6 +47,10 @@ function App() {
   const [client, setClient] = useState<AssistantClient | null>(null);
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
   const [messageBarFocused, setMessageBarFocused] = useState(false);
+  const [showModelSelectorModal, setShowModelSelectorModal] = useState(false);
+  const [selectedProfile, setSelectedProfile] =
+    useState<AssistantProfile | null>(null);
+  const [messagesBoxFocused, setMessagesBoxFocused] = useState(false);
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -71,6 +84,12 @@ function App() {
             setCurrentThreadId,
             messageBarFocused,
             setMessageBarFocused,
+            showModelSelectorModal,
+            setShowModelSelectorModal,
+            selectedProfile,
+            setSelectedProfile,
+            messagesBoxFocused,
+            setMessagesBoxFocused,
           }}
         >
           <MainScreen />

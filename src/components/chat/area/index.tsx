@@ -7,11 +7,25 @@ import {
 import { useAppContext } from "../../..";
 import ChatMessageComponent from "../message";
 import MessageBar from "../bar/MessageBar";
+import { useKeyboard } from "@opentui/react";
 
 const ChatArea = () => {
-  const { client, currentThreadId } = useAppContext();
+  const {
+    client,
+    currentThreadId,
+    messagesBoxFocused,
+    setMessagesBoxFocused,
+    setMessageBarFocused,
+  } = useAppContext();
 
   const [messages, setMessages] = useState<AssistantThreadMessage[]>([]);
+
+  useKeyboard((key) => {
+    if (key.name === "g" && key.ctrl) {
+      setMessagesBoxFocused((val) => !val);
+      setMessageBarFocused(false);
+    }
+  });
 
   const loadThread = async () => {
     try {
@@ -70,7 +84,7 @@ const ChatArea = () => {
       paddingRight={3}
       flexDirection="column"
     >
-      <scrollbox height="100%" width="100%">
+      <scrollbox height="100%" width="100%" focused={messagesBoxFocused}>
         {messages.map((msg) => (
           <ChatMessageComponent message={msg} key={msg.id} />
         ))}

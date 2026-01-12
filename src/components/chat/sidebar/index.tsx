@@ -5,8 +5,14 @@ import { useKeyboard } from "@opentui/react";
 import ThreadItem from "./ThreadItem";
 
 const ChatSidebar = () => {
-  const { client, setCurrentThreadId, currentThreadId, messageBarFocused } =
-    useAppContext();
+  const {
+    client,
+    setCurrentThreadId,
+    currentThreadId,
+    messageBarFocused,
+    showModelSelectorModal,
+    messagesBoxFocused,
+  } = useAppContext();
 
   const [threads, setThreads] = useState<Record<
     string,
@@ -27,11 +33,17 @@ const ChatSidebar = () => {
 
   // Handle keyboard navigation for thread selection
   useKeyboard((key) => {
-    if (!flatThreads.length || messageBarFocused) return;
+    if (
+      !flatThreads.length ||
+      messageBarFocused ||
+      showModelSelectorModal ||
+      messagesBoxFocused
+    )
+      return;
 
-    if (key.name === "up") {
+    if (key.name === "up" || key.name === "k") {
       setFocusedThreadIndex((prev) => Math.max(0, prev - 1));
-    } else if (key.name === "down") {
+    } else if (key.name === "down" || key.name === "j") {
       setFocusedThreadIndex((prev) =>
         Math.min(flatThreads.length - 1, prev + 1),
       );
