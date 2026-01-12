@@ -17,6 +17,7 @@ import {
   type AssistantThreadMessage,
 } from "./lib/data/kagiClient";
 import { initPreferences, UserPreferences } from "./lib/data/preferences";
+import { copyToClipboard } from "./lib/clipboard";
 
 enum Screen {
   Pending,
@@ -101,7 +102,7 @@ function App() {
     }
 
     // Ctrl + G – toggle MessagesBox focus
-    if (name === "g" && ctrl) {
+    if (name === "g" && ctrl && messages.length > 0 && !!currentThreadId) {
       setMessagesBoxFocused((v) => !v);
       return setMessageBarFocused(false);
     }
@@ -152,5 +153,7 @@ const renderer = await createCliRenderer({
   targetFps: 30,
 });
 // renderer.console.toggle();
-
+renderer.on("selection", (selection) => {
+  copyToClipboard(selection?.getSelectedText() ?? "");
+});
 createRoot(renderer).render(<App />);
