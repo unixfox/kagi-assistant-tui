@@ -27,12 +27,10 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
     setMessages,
     setCurrentThreadTitle,
     setCurrentThreadLoading,
+    threads,
+    setThreads,
   } = useAppContext();
 
-  const [threads, setThreads] = useState<Record<
-    string,
-    AssistantThread[]
-  > | null>(null);
   const [focusedThreadIndex, setFocusedThreadIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);

@@ -432,7 +432,7 @@ export class AssistantClient {
 
   // --- HTML Parsing Helpers ---
 
-  private parseThreadListHtml(html: string): Record<string, AssistantThread[]> {
+  public parseThreadListHtml(html: string): Record<string, AssistantThread[]> {
     const threadMap: Record<string, AssistantThread[]> = {};
     const $ = cheerio.load(html);
 

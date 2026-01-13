@@ -10,7 +10,6 @@ import {
   type MessageDto,
 } from "../../../lib/data/kagiClient";
 import type { SubmitEvent } from "@opentui/core";
-import TurndownService from "turndown";
 import {
   convertDetailsToBlockquote,
   preprocessCodeBlocks,
@@ -56,6 +55,7 @@ const MessageBar = () => {
     messages,
     currentThreadId,
     client,
+    setThreads,
   } = useAppContext();
   const messagesRef = useRef(messages);
   const selectedProfileRef = useRef(selectedProfile);
@@ -176,7 +176,6 @@ const MessageBar = () => {
       };
 
       for await (const chunk of stream) {
-        console.log(chunk);
         if (chunk.header === "tokens.json") {
           // Streaming text tokens
           const json = JSON.parse(chunk.data);
@@ -195,6 +194,9 @@ const MessageBar = () => {
             content: newText,
             markdownContent: md,
           }));
+        } else if (chunk.header === "thread_list.html") {
+          const threads = client.parseThreadListHtml(chunk.data);
+          setThreads(threads);
         } else if (chunk.header === "new_message.json") {
           // Final message confirmation
           const dto = JSON.parse(chunk.data) as MessageDto;
@@ -230,16 +232,21 @@ const MessageBar = () => {
         } else if (chunk.header === "thread.json") {
           // Thread creation/update info
           const json = JSON.parse(chunk.data);
-          if (json.id && !currentThreadId) {
-            // Only set the thread ID if we don't have one yet (new chat)
-            // This prevents unnecessary re-loads when sending messages in existing threads
-            setCurrentThreadId(json.id);
-            setCurrentThreadTitle(json.title);
-          }
-          // Always update the title even if thread ID hasn't changed
-          if (json.id && currentThreadId) {
-            setCurrentThreadTitle(json.title);
-          }
+          setCurrentThreadId(json.id);
+          setCurrentThreadTitle(json.title);
+          setThreads((prev) => {
+            if (!prev) return prev;
+            return Object.fromEntries(
+              Object.entries(prev).map(([category, threads]) => [
+                category,
+                threads.map((thread) =>
+                  thread.id === json.id
+                    ? { ...thread, title: json.title }
+                    : thread,
+                ),
+              ]),
+            );
+          });
         } else if (chunk.header === "location.json") {
           // Branch ID updates
           const json = JSON.parse(chunk.data);

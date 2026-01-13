@@ -14,6 +14,7 @@ import { Keychain } from "./lib/data/keychain";
 import {
   AssistantClient,
   type AssistantProfile,
+  type AssistantThread,
   type AssistantThreadMessage,
 } from "./lib/data/kagiClient";
 import { initPreferences } from "./lib/data/preferences";
@@ -54,6 +55,11 @@ export interface AppContextProps {
 
   currentThreadLoading: boolean;
   setCurrentThreadLoading: Dispatch<SetStateAction<boolean>>;
+
+  threads: Record<string, AssistantThread[]> | null;
+  setThreads: Dispatch<
+    SetStateAction<Record<string, AssistantThread[]> | null>
+  >;
 }
 
 const AppContext = createContext<AppContextProps>({} as AppContextProps);
@@ -77,6 +83,10 @@ function App({ renderer }: { renderer: CliRenderer }) {
   );
   const [showSidebar, setShowSidebar] = useState(true);
   const [currentThreadLoading, setCurrentThreadLoading] = useState(false);
+  const [threads, setThreads] = useState<Record<
+    string,
+    AssistantThread[]
+  > | null>(null);
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -191,6 +201,8 @@ function App({ renderer }: { renderer: CliRenderer }) {
             setShowSidebar,
             currentThreadLoading,
             setCurrentThreadLoading,
+            threads,
+            setThreads,
           }}
         >
           <MainScreen />
