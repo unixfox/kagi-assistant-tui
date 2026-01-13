@@ -14,6 +14,7 @@ import {
   type MessageDto,
 } from "../../../lib/data/kagiClient";
 import turndownService from "../../../lib/tdown";
+import "opentui-spinner/react";
 
 const ChatSidebar = ({ show }: { show: boolean }) => {
   const {
@@ -25,6 +26,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
     messagesBoxFocused,
     setMessages,
     setCurrentThreadTitle,
+    setCurrentThreadLoading,
   } = useAppContext();
 
   const [threads, setThreads] = useState<Record<
@@ -105,6 +107,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
   }, []);
 
   const loadThread = async (currentThreadId: string) => {
+    setCurrentThreadLoading(true);
     setMessages([]);
     try {
       const stream = client.fetchStream(
@@ -161,6 +164,8 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
       }
     } catch (e) {
       console.error("Failed to fetch stream for thread_open", e);
+    } finally {
+      setCurrentThreadLoading(false);
     }
   };
 
@@ -228,12 +233,18 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
           ))}
         </scrollbox>
       ) : (
-        <box paddingLeft={1} paddingTop={1}>
-          <text>
-            {searchQuery.trim()
-              ? "No threads found matching your search."
-              : "Loading threads..."}
-          </text>
+        <box
+          paddingLeft={1}
+          paddingTop={1}
+          justifyContent="center"
+          alignItems="center"
+          height="100%"
+        >
+          {searchQuery.trim() ? (
+            <text>No threads found.</text>
+          ) : (
+            <spinner name="bouncingBall" color="#5B6097" />
+          )}
         </box>
       )}
     </box>

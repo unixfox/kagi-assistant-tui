@@ -51,6 +51,9 @@ export interface AppContextProps {
 
   showSidebar: boolean;
   setShowSidebar: Dispatch<SetStateAction<boolean>>;
+
+  currentThreadLoading: boolean;
+  setCurrentThreadLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 const AppContext = createContext<AppContextProps>({} as AppContextProps);
@@ -73,6 +76,7 @@ function App({ renderer }: { renderer: CliRenderer }) {
     "New Chat",
   );
   const [showSidebar, setShowSidebar] = useState(true);
+  const [currentThreadLoading, setCurrentThreadLoading] = useState(false);
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -183,6 +187,8 @@ function App({ renderer }: { renderer: CliRenderer }) {
             setCurrentThreadTitle,
             showSidebar,
             setShowSidebar,
+            currentThreadLoading,
+            setCurrentThreadLoading,
           }}
         >
           <MainScreen />

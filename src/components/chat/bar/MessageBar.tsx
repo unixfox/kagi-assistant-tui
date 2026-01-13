@@ -56,8 +56,17 @@ const MessageBar = () => {
     currentThreadId,
     client,
   } = useAppContext();
+  const messagesRef = useRef(messages);
+  const selectedProfileRef = useRef(selectedProfile);
 
-  // Keep the ref in sync with the state
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  useEffect(() => {
+    selectedProfileRef.current = selectedProfile;
+  }, [selectedProfile]);
+
   useEffect(() => {
     currentThreadIdRef.current = currentThreadId;
   }, [currentThreadId]);
@@ -71,6 +80,8 @@ const MessageBar = () => {
     let inProgressId = `${messageId}.reply`;
     let currentInProgressId = inProgressId; // Mutable tracker for ID updates during stream
 
+    const messages = messagesRef.current;
+    const selectedProfile = selectedProfileRef.current;
     // Get context from previous messages
     const assistantMessages = messages.filter(
       (m: AssistantThreadMessage) =>
@@ -305,7 +316,7 @@ const MessageBar = () => {
         minHeight={5}
         marginBottom={1}
       >
-        <box height="100%" width={1} backgroundColor="#C098FF" />
+        <box height="100%" width={1} backgroundColor="#5B6097" />
         <box height="100%" width="100%" padding={1}>
           <textarea
             keyBindings={[

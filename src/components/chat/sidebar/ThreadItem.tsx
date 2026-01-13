@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { type AssistantThread } from "../../../lib/data/kagiClient";
-import { useKeyboard } from "@opentui/react";
 
 interface ThreadItemProps {
   thread: AssistantThread;
@@ -14,7 +13,7 @@ const PREVIEW_SIZE = 30;
 const ThreadItem = ({ thread, isHovering, isSelected }: ThreadItemProps) => {
   const backgroundColor = useMemo(() => {
     if (isSelected) {
-      return "#5D5A6F";
+      return "#5B6097";
     }
 
     if (isHovering) {

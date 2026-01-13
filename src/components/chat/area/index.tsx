@@ -5,6 +5,7 @@ import { useKeyboard } from "@opentui/react";
 import ChatMessageComponent from "../message";
 import MessageBar from "../bar/MessageBar";
 import EmptyChatAreaPlaceholder from "./EmptyChatAreaPlaceholder";
+import "opentui-spinner/react";
 
 const ChatArea = () => {
   const {
@@ -13,6 +14,7 @@ const ChatArea = () => {
     messagesBoxFocused,
     messages,
     setMessages,
+    currentThreadLoading,
   } = useAppContext();
   const scrollboxRef = useRef<ScrollBoxRenderable>(null);
   const loadedThreadIdRef = useRef<string | null>(null);
@@ -91,18 +93,31 @@ const ChatArea = () => {
         </text>
       </box>
       <box paddingLeft={3} paddingRight={3} flexGrow={1}>
-        <scrollbox
-          ref={scrollboxRef}
-          height="100%"
-          width="100%"
-          focused={messagesBoxFocused}
-          flexGrow={1}
-        >
-          {messages.map((msg) => (
-            <ChatMessageComponent message={msg} key={msg.id} />
-          ))}
-          {messages.length === 0 && <EmptyChatAreaPlaceholder />}
-        </scrollbox>
+        {currentThreadLoading ? (
+          <box
+            height="100%"
+            width="100%"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <spinner name="bouncingBall" color="#5B6097" />
+          </box>
+        ) : (
+          <>
+            <scrollbox
+              ref={scrollboxRef}
+              height="100%"
+              width="100%"
+              focused={messagesBoxFocused}
+              flexGrow={1}
+            >
+              {messages.map((msg) => (
+                <ChatMessageComponent message={msg} key={msg.id} />
+              ))}
+              {messages.length === 0 && <EmptyChatAreaPlaceholder />}
+            </scrollbox>
+          </>
+        )}
         <MessageBar />
       </box>
     </box>
