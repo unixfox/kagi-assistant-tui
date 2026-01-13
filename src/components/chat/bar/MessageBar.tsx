@@ -1,7 +1,7 @@
 import { useKeyboard } from "@opentui/react";
 import { useEffect, useRef, useState } from "react";
 import * as cheerio from "cheerio";
-import { useAppContext } from "../../..";
+import { prefs, useAppContext } from "../../..";
 import {
   AssistantThreadMessageRole,
   type KagiPromptRequest,
@@ -16,6 +16,7 @@ import {
   preprocessCodeBlocks,
 } from "../../../lib/preprocess";
 import turndownService from "../../../lib/tdown";
+import { Keychain } from "../../../lib/data/keychain";
 
 function parseReferencesHtml(html: string): Citation[] {
   const $ = cheerio.load(html);
@@ -299,6 +300,11 @@ const MessageBar = () => {
       setShowModelSelectorModal(true);
     } else if (value === "/new") {
       newChat();
+    } else if (value === "/logout") {
+      prefs.clear();
+      new Keychain().deleteToken().then(() => {
+        process.exit(0);
+      });
     } else {
       // Call the implementation
       handleSendMessage(value);

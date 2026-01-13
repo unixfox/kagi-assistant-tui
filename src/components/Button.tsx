@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useKeyboard } from "@opentui/react";
 import { colors } from "../lib/theme";
+import "opentui-spinner/react";
 
 interface ButtonProps {
   label?: string;
@@ -9,6 +10,7 @@ interface ButtonProps {
   onClick?: () => void;
   focused?: boolean;
   style?: any;
+  loading?: boolean;
 }
 
 const CustomButton = ({
@@ -18,6 +20,7 @@ const CustomButton = ({
   onClick,
   focused = false,
   style = {},
+  loading = false,
 }: ButtonProps) => {
   const [isPressed, setIsPressed] = useState(false);
 
@@ -58,7 +61,13 @@ const CustomButton = ({
         ...style,
       }}
     >
-      <text fg="#000000">{label}</text>
+      {loading ? (
+        <spinner name="bouncingBall" color="black" />
+      ) : (
+        <text fg="#000000">
+          <strong>{label}</strong>
+        </text>
+      )}
     </box>
   );
 };

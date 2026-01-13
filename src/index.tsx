@@ -16,7 +16,7 @@ import {
   type AssistantProfile,
   type AssistantThreadMessage,
 } from "./lib/data/kagiClient";
-import { initPreferences, UserPreferences } from "./lib/data/preferences";
+import { initPreferences } from "./lib/data/preferences";
 import { copyToClipboard } from "./lib/clipboard";
 
 enum Screen {
@@ -166,7 +166,9 @@ function App({ renderer }: { renderer: CliRenderer }) {
   return (
     <>
       {screen === Screen.Pending && <></>}
-      {screen === Screen.Onboarding && <Onboarding />}
+      {screen === Screen.Onboarding && (
+        <Onboarding recheck={checkStateForScreen} />
+      )}
       {screen === Screen.Main && client && (
         <AppContext.Provider
           value={{

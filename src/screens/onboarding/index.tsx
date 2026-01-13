@@ -6,10 +6,13 @@ import {
   type QrRemoteSessionDetails,
 } from "../../lib/data/kagiClient";
 import { Keychain } from "../../lib/data/keychain";
+import { colors } from "../../lib/theme";
 
-const Onboarding = () => {
+const Onboarding = ({ recheck }: { recheck: () => void }) => {
   const tClient = new AssistantClient("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -27,6 +30,7 @@ const Onboarding = () => {
 
     if (timerRef.current) clearInterval(timerRef.current);
 
+    setChecking(true);
     // Pass 'sess' directly so the function has the fresh data
     timerRef.current = setInterval(() => checkCeremony(sess), 1000);
   };
@@ -44,7 +48,7 @@ const Onboarding = () => {
       await keychain.setToken(res);
       console.log("Stored kagi token in keychain");
 
-      process.exit(0);
+      recheck();
     } catch (e) {
       console.log("Nothing yet");
     }
@@ -52,19 +56,31 @@ const Onboarding = () => {
 
   return (
     <box alignItems="center" justifyContent="center" height="100%" width="100%">
-      <box border padding={3} width={80}>
-        <ascii-font font="tiny" text="Kagi Assistant" alignSelf="center" />
-        <CustomButton
-          label="Sign in"
-          variant="primary"
-          size="medium"
-          onClick={handleSignIn}
-          focused={true}
-          style={{ marginTop: 2 }}
-        />
-        <text marginTop={2} alignSelf="center">
-          Your chats will be synced to this device.
-        </text>
+      <box flexDirection="column" justifyContent="center" width={80}>
+        <box padding={3} backgroundColor={colors.background}>
+          <ascii-font font="tiny" text="Kagi Assistant" alignSelf="center" />
+          <CustomButton
+            label="Sign in"
+            variant="primary"
+            size="medium"
+            onClick={handleSignIn}
+            focused={true}
+            style={{ marginTop: 2 }}
+            loading={checking}
+          />
+        </box>
+        <box
+          flexDirection="row"
+          width="100%"
+          justifyContent="center"
+          marginTop={1}
+        >
+          <box flexDirection="row" gap={1}>
+            <text>Kagi Assistant TUI</text>
+            <text>•</text>
+            <text>© 2025 httpjames.space</text>
+          </box>
+        </box>
       </box>
     </box>
   );
