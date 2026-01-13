@@ -4,7 +4,7 @@ import ChatSidebar from "../../components/chat/sidebar";
 import ModelSelectorModal from "../../components/modals/ModelSelectorModal";
 
 const MainScreen = () => {
-  const { showModelSelectorModal } = useAppContext();
+  const { showModelSelectorModal, showSidebar } = useAppContext();
   return (
     <>
       <box
@@ -14,7 +14,7 @@ const MainScreen = () => {
         backgroundColor={"#1A1B26"}
       >
         <ModelSelectorModal show={showModelSelectorModal} />
-        <ChatSidebar />
+        <ChatSidebar show={showSidebar} />
         <ChatArea />
       </box>
     </>

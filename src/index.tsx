@@ -48,6 +48,9 @@ export interface AppContextProps {
 
   currentThreadTitle: string | null;
   setCurrentThreadTitle: Dispatch<SetStateAction<string | null>>;
+
+  showSidebar: boolean;
+  setShowSidebar: Dispatch<SetStateAction<boolean>>;
 }
 
 const AppContext = createContext<AppContextProps>({} as AppContextProps);
@@ -69,6 +72,7 @@ function App({ renderer }: { renderer: CliRenderer }) {
   const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
     "New Chat",
   );
+  const [showSidebar, setShowSidebar] = useState(true);
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -104,6 +108,7 @@ function App({ renderer }: { renderer: CliRenderer }) {
       setShowModelSelectorModal(false);
       setMessageBarFocused(false);
       setMessagesBoxFocused(false);
+      return;
     }
 
     if (name === "m" && ctrl) {
@@ -135,6 +140,11 @@ function App({ renderer }: { renderer: CliRenderer }) {
       console.log("^d detected. byeeeeeee");
       renderer.stop();
       process.exit(0); // todo make this not shit
+      return;
+    }
+
+    if (name === "b" && ctrl) {
+      setShowSidebar((val) => !val);
     }
   });
 
@@ -160,6 +170,8 @@ function App({ renderer }: { renderer: CliRenderer }) {
             setMessages,
             currentThreadTitle,
             setCurrentThreadTitle,
+            showSidebar,
+            setShowSidebar,
           }}
         >
           <MainScreen />

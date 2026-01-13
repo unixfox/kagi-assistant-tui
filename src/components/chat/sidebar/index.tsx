@@ -5,7 +5,7 @@ import { useKeyboard } from "@opentui/react";
 import ThreadItem from "./ThreadItem";
 import SearchBar from "../../SearchBar";
 
-const ChatSidebar = () => {
+const ChatSidebar = ({ show }: { show: boolean }) => {
   const {
     client,
     setCurrentThreadId,
@@ -90,6 +90,8 @@ const ChatSidebar = () => {
   useEffect(() => {
     loadThreads();
   }, []);
+
+  if (!show) return null;
 
   return (
     <box
