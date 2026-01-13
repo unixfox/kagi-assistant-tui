@@ -7,12 +7,11 @@ interface ThreadItemProps {
   isHovering: boolean;
   isSelected: boolean;
   onClick?: () => void;
-  focused?: boolean;
 }
 
 const PREVIEW_SIZE = 30;
 
-const ThreadItem = ({ thread, isHovering, isSelected, onClick, focused = false }: ThreadItemProps) => {
+const ThreadItem = ({ thread, isHovering, isSelected }: ThreadItemProps) => {
   const backgroundColor = useMemo(() => {
     if (isSelected) {
       return "#5D5A6F";
@@ -24,12 +23,6 @@ const ThreadItem = ({ thread, isHovering, isSelected, onClick, focused = false }
 
     return "transparent";
   }, [isHovering, isSelected]);
-
-  useKeyboard((key) => {
-    if (focused && key.name === "return") {
-      onClick?.();
-    }
-  });
 
   return (
     <box

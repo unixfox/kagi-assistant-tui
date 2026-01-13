@@ -185,7 +185,7 @@ const renderer = await createCliRenderer({
   targetFps: 120,
   exitOnCtrlC: false,
 });
-// renderer.console.toggle();
+renderer.console.toggle();
 renderer.on("selection", (selection) => {
   copyToClipboard(selection?.getSelectedText() ?? "");
 });
