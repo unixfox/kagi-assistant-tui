@@ -29,6 +29,7 @@ const ChatArea = () => {
     setMessages,
   } = useAppContext();
   const scrollboxRef = useRef<ScrollBoxRenderable>(null);
+  const loadedThreadIdRef = useRef<string | null>(null);
   const lastGPressTime = useRef<number>(0);
   const G_TIMEOUT = 500; // Time window in ms for "gg" detection
 
@@ -110,9 +111,16 @@ const ChatArea = () => {
   useEffect(() => {
     if (currentThreadId === null) {
       setMessages([]);
+      loadedThreadIdRef.current = null;
       return;
     }
-    loadThread();
+
+    // Only load thread if we're switching to a different thread
+    // (not when the current thread is being updated during generation)
+    if (currentThreadId !== loadedThreadIdRef.current) {
+      loadThread();
+      loadedThreadIdRef.current = currentThreadId;
+    }
   }, [currentThreadId]);
 
   // Auto-scroll to bottom when messages change

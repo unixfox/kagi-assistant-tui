@@ -1,5 +1,5 @@
 import { useKeyboard } from "@opentui/react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as cheerio from "cheerio";
 import { useAppContext } from "../../..";
 import {
@@ -15,6 +15,7 @@ import {
   convertDetailsToBlockquote,
   preprocessCodeBlocks,
 } from "../../../lib/preprocess";
+import { removeLastWord } from "../../../lib/manip";
 
 // --- Helper Functions ---
 
@@ -45,21 +46,25 @@ function parseMetadata(html: string): Record<string, string> {
 
 const MessageBar = () => {
   const textareaRef = useRef<any>(null);
+  const currentThreadIdRef = useRef<string | null>(null);
 
   // Destructure all necessary state from context
   const {
     messageBarFocused,
-    setMessageBarFocused,
     setShowModelSelectorModal,
     selectedProfile,
-    setMessagesBoxFocused,
     setCurrentThreadTitle,
     setCurrentThreadId,
     setMessages,
-    messages, // Needed for context awareness (previous message ID)
-    currentThreadId, // Needed for API request
+    messages,
+    currentThreadId,
     client,
   } = useAppContext();
+
+  // Keep the ref in sync with the state
+  useEffect(() => {
+    currentThreadIdRef.current = currentThreadId;
+  }, [currentThreadId]);
 
   // Core logic adapted from Kotlin MainViewModel.sendMessage
   const handleSendMessage = async (text: string) => {
@@ -110,12 +115,10 @@ const MessageBar = () => {
       assistantMsg,
     ]);
 
-    console.log(selectedProfile);
-
     // 3. Prepare Request Body
     const requestBody: KagiPromptRequest = {
       focus: {
-        thread_id: currentThreadId || null,
+        thread_id: currentThreadIdRef.current,
         message_id: latestAssistantMessageId?.replace(".reply", "") || null,
         prompt: text.trim(),
         branch_id: branchId || "00000000-0000-0000-4000-000000000000",
@@ -127,7 +130,7 @@ const MessageBar = () => {
         model: selectedProfile?.model || "Kagi Assistant", // Fallback
         personalizations: false,
       },
-      threads: currentThreadId
+      threads: currentThreadIdRef.current
         ? undefined
         : [
             {
@@ -219,8 +222,14 @@ const MessageBar = () => {
         } else if (chunk.header === "thread.json") {
           // Thread creation/update info
           const json = JSON.parse(chunk.data);
-          if (json.id) {
+          if (json.id && !currentThreadId) {
+            // Only set the thread ID if we don't have one yet (new chat)
+            // This prevents unnecessary re-loads when sending messages in existing threads
             setCurrentThreadId(json.id);
+            setCurrentThreadTitle(json.title);
+          }
+          // Always update the title even if thread ID hasn't changed
+          if (json.id && currentThreadId) {
             setCurrentThreadTitle(json.title);
           }
         } else if (chunk.header === "location.json") {
@@ -265,10 +274,14 @@ const MessageBar = () => {
       return;
     }
 
-    if (key.name === "c" && key.ctrl) {
+    if (key.name === "c" && key.ctrl && messageBarFocused) {
       if (textareaRef.current) {
         textareaRef.current.clear();
       }
+    }
+
+    if (key.raw === "\x7F" && messageBarFocused) {
+      textareaRef.current.deleteWordBackward();
     }
   });
 
@@ -303,7 +316,7 @@ const MessageBar = () => {
               { name: "return", action: "submit" },
               { name: "return", shift: true, action: "newline" },
             ]}
-            onSubmit={handleSubmit}
+            onSubmit={(e) => handleSubmit(e)}
             ref={textareaRef}
             width="100%"
             maxHeight={10}

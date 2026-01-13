@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { type AssistantThread } from "../../../lib/data/kagiClient";
 import { useAppContext } from "../../..";
 import { useKeyboard } from "@opentui/react";
 import ThreadItem from "./ThreadItem";
+import SearchBar from "../../SearchBar";
 
 const ChatSidebar = () => {
   const {
@@ -19,6 +20,8 @@ const ChatSidebar = () => {
     AssistantThread[]
   > | null>(null);
   const [focusedThreadIndex, setFocusedThreadIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
 
   const loadThreads = async () => {
     try {
@@ -28,8 +31,36 @@ const ChatSidebar = () => {
     }
   };
 
-  // Flatten threads for navigation
-  const flatThreads = threads ? Object.values(threads).flat() : [];
+  // Filter threads based on search query
+  const filteredThreads = useMemo(() => {
+    if (!threads) return null;
+
+    if (!searchQuery.trim()) return threads;
+
+    const query = searchQuery.toLowerCase();
+    const filtered: Record<string, AssistantThread[]> = {};
+
+    Object.entries(threads).forEach(([category, threadList]) => {
+      const filteredList = threadList.filter(
+        (thread) =>
+          thread.title.toLowerCase().includes(query) ||
+          thread.excerpt.toLowerCase().includes(query),
+      );
+
+      if (filteredList.length > 0) {
+        filtered[category] = filteredList;
+      }
+    });
+
+    return Object.keys(filtered).length > 0 ? filtered : null;
+  }, [threads, searchQuery]);
+
+  // Flatten threads for navigation (use filtered threads if search is active)
+  const flatThreads = useMemo(() => {
+    const threadsToUse =
+      (searchQuery.trim() ? filteredThreads : threads) || null;
+    return threadsToUse ? Object.values(threadsToUse).flat() : [];
+  }, [threads, filteredThreads, searchQuery]);
 
   // Handle keyboard navigation for thread selection
   useKeyboard((key) => {
@@ -37,7 +68,8 @@ const ChatSidebar = () => {
       !flatThreads.length ||
       messageBarFocused ||
       showModelSelectorModal ||
-      messagesBoxFocused
+      messagesBoxFocused ||
+      searchFocused
     )
       return;
 
@@ -66,11 +98,28 @@ const ChatSidebar = () => {
       flexDirection="column"
       backgroundColor="#222436"
     >
-      <box paddingTop={2}></box>
+      {/* Search Bar */}
+      <SearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchFocused={searchFocused}
+        setSearchFocused={setSearchFocused}
+        onSubmit={() => {
+          // Focus first result when submit is pressed
+          const filteredFlatThreads = filteredThreads
+            ? Object.values(filteredThreads).flat()
+            : [];
+          if (filteredFlatThreads.length > 0) {
+            setFocusedThreadIndex(0);
+            setCurrentThreadId(filteredFlatThreads[0]!.id);
+            setSearchFocused(false);
+          }
+        }}
+      />
 
-      {threads ? (
+      {filteredThreads ? (
         <scrollbox height="100%" paddingTop={1}>
-          {Object.entries(threads).map(([category, threadList]) => (
+          {Object.entries(filteredThreads).map(([category, threadList]) => (
             <box
               key={category}
               flexDirection="column"
@@ -81,8 +130,10 @@ const ChatSidebar = () => {
               <text style={{ marginBottom: 1 }}>{category}</text>
               {threadList.map((thread) => {
                 const isSelected = currentThreadId === thread.id;
+                const filteredFlatThreads =
+                  Object.values(filteredThreads).flat();
                 const isFocused =
-                  flatThreads[focusedThreadIndex]?.id === thread.id;
+                  filteredFlatThreads[focusedThreadIndex]?.id === thread.id;
 
                 return (
                   <ThreadItem
@@ -98,7 +149,13 @@ const ChatSidebar = () => {
           ))}
         </scrollbox>
       ) : (
-        <></>
+        <box paddingLeft={1} paddingTop={1}>
+          <text>
+            {searchQuery.trim()
+              ? "No threads found matching your search."
+              : "Loading threads..."}
+          </text>
+        </box>
       )}
     </box>
   );
