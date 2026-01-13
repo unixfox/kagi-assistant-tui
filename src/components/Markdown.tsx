@@ -22,6 +22,13 @@ interface DetailsBlock {
   content: string;
   position: number; // Position in original content
 }
+const syntaxStyle = SyntaxStyle.fromStyles({
+  keyword: { fg: RGBA.fromHex("#ff6b6b"), bold: true }, // red, bold
+  string: { fg: RGBA.fromHex("#51cf66") }, // green
+  comment: { fg: RGBA.fromHex("#868e96"), italic: true }, // gray, italic
+  number: { fg: RGBA.fromHex("#ffd43b") }, // yellow
+  default: { fg: RGBA.fromHex("#ffffff") }, // white
+});
 
 const defaultTheme: MarkdownTheme = {
   h1: { fg: "#ff007c", bold: true, underline: true }, // Magenta/Pinkish
@@ -176,6 +183,8 @@ const Markdown = ({ content, theme: userTheme }: MarkdownProps) => {
 
       case "code": {
         const codeToken = token as Tokens.Code;
+        const lang = codeToken.lang?.toLowerCase() || "rust";
+        console.log(lang);
         return (
           <box
             key={key}
@@ -187,8 +196,8 @@ const Markdown = ({ content, theme: userTheme }: MarkdownProps) => {
             {/* Using the OpenTUI Code Component */}
             <code
               content={codeToken.text}
-              syntaxStyle={SyntaxStyle.fromTheme([])}
-              filetype={codeToken.lang?.toLowerCase() || "typescript"}
+              syntaxStyle={syntaxStyle}
+              filetype={lang}
             />
           </box>
         );

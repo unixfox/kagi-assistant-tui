@@ -22,7 +22,7 @@ const ChatMessageComponent = ({
       >
         <box
           width={
-            message.role === AssistantThreadMessageRole.USER ? "30%" : "100%"
+            message.role === AssistantThreadMessageRole.USER ? "50%" : "100%"
           }
           backgroundColor={
             message.role === AssistantThreadMessageRole.USER

@@ -10,8 +10,15 @@ import {
   type MessageDto,
 } from "../../../lib/data/kagiClient";
 import type { SubmitEvent } from "@opentui/core";
+import TurndownService from "turndown";
+import {
+  convertDetailsToBlockquote,
+  preprocessCodeBlocks,
+} from "../../../lib/preprocess";
 
 // --- Helper Functions ---
+
+const turndownService = new TurndownService();
 
 function parseReferencesHtml(html: string): Citation[] {
   const $ = cheerio.load(html);
@@ -165,7 +172,17 @@ const MessageBar = () => {
           const incomingId = json.id || "";
           const targetId = `${incomingId}.reply`;
 
-          updateMessageById(targetId, (msg) => ({ ...msg, content: newText }));
+          const md = turndownService.turndown(
+            await preprocessCodeBlocks(
+              await convertDetailsToBlockquote(newText),
+            ),
+          );
+
+          updateMessageById(targetId, (msg) => ({
+            ...msg,
+            content: newText,
+            markdownContent: md,
+          }));
         } else if (chunk.header === "new_message.json") {
           // Final message confirmation
           const dto = JSON.parse(chunk.data) as MessageDto;
@@ -235,14 +252,24 @@ const MessageBar = () => {
     }
   };
 
+  const newChat = () => {
+    setCurrentThreadId(null);
+    setMessages([]);
+  };
+
+  useKeyboard((key) => {
+    if (key.name === "o" && key.ctrl) {
+      newChat();
+    }
+  });
+
   const handleSubmit = (e: SubmitEvent) => {
     const value = textareaRef.current?.plainText;
 
     if (value === "/model") {
       setShowModelSelectorModal(true);
     } else if (value === "/new") {
-      setCurrentThreadId(null);
-      setMessages([]); // Clear local messages for new chat
+      newChat();
     } else {
       // Call the implementation
       handleSendMessage(value);

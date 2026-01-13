@@ -9,6 +9,14 @@ import { useAppContext } from "../../..";
 import { useKeyboard } from "@opentui/react";
 import ChatMessageComponent from "../message";
 import MessageBar from "../bar/MessageBar";
+import {
+  convertDetailsToBlockquote,
+  preprocessCodeBlocks,
+} from "../../../lib/preprocess";
+import TurndownService from "turndown";
+import EmptyChatAreaPlaceholder from "./EmptyChatAreaPlaceholder";
+
+const turndownService = new TurndownService();
 
 const ChatArea = () => {
   const { client, currentThreadId, messagesBoxFocused, messages, setMessages } =
@@ -47,6 +55,13 @@ const ChatArea = () => {
           const dtos: MessageDto[] = JSON.parse(chunk.data);
 
           for (const dto of dtos) {
+            const md = turndownService.turndown(
+              await preprocessCodeBlocks(
+                await convertDetailsToBlockquote(dto.reply || ""),
+              ),
+            );
+            console.log(md);
+
             setMessages((prev) => [
               ...prev,
               {
@@ -66,7 +81,8 @@ const ChatArea = () => {
                 documents: [],
                 branchIds: dto.branch_list,
                 finishedGenerating: true,
-                markdownContent: dto.md,
+                markdownContent: md,
+                // markdownContent: dto.md,
               } as AssistantThreadMessage,
             ]);
           }
@@ -132,6 +148,7 @@ const ChatArea = () => {
         {messages.map((msg) => (
           <ChatMessageComponent message={msg} key={msg.id} />
         ))}
+        {messages.length === 0 && <EmptyChatAreaPlaceholder />}
       </scrollbox>
       <MessageBar />
     </box>

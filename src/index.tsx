@@ -94,6 +94,13 @@ function App() {
   useKeyboard((key) => {
     const { name, ctrl } = key;
 
+    if (name === "m" && ctrl) {
+      setShowModelSelectorModal((val) => !val);
+      setMessageBarFocused(false);
+      setMessagesBoxFocused(false);
+      return;
+    }
+
     // Ctrl + X – unfocus everything (sidebar becomes active)
     if (name === "x" && ctrl) {
       setMessageBarFocused(false);
@@ -150,7 +157,7 @@ function App() {
 }
 
 const renderer = await createCliRenderer({
-  targetFps: 30,
+  targetFps: 60,
 });
 // renderer.console.toggle();
 renderer.on("selection", (selection) => {
