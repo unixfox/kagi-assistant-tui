@@ -44,12 +44,12 @@ const ChatArea = () => {
     }
   }, [currentThreadId]);
 
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [messages, scrollToBottom]);
+  // // Auto-scroll to bottom when messages change
+  // useEffect(() => {
+  //   if (messages.length > 0) {
+  //     scrollToBottom();
+  //   }
+  // }, [messages, scrollToBottom]);
 
   // Handle keyboard shortcuts for scrolling
   useKeyboard((key) => {
@@ -105,6 +105,8 @@ const ChatArea = () => {
         ) : (
           <>
             <scrollbox
+              stickyStart="bottom"
+              stickyScroll
               ref={scrollboxRef}
               height="100%"
               width="100%"

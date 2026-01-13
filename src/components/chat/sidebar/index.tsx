@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { type AssistantThread } from "../../../lib/data/kagiClient";
 import { useAppContext } from "../../..";
 import { useKeyboard } from "@opentui/react";
@@ -34,6 +34,8 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
   const [focusedThreadIndex, setFocusedThreadIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const scrollBoxRef = useRef<any>(null); // Type as ScrollBoxRenderable if imported
+  const activeItemRef = useRef<any>(null); // Type as BoxRenderable if imported
 
   const loadThreads = async () => {
     try {
@@ -196,7 +198,12 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
       />
 
       {filteredThreads ? (
-        <scrollbox height="100%" paddingTop={1}>
+        <scrollbox
+          height="100%"
+          paddingTop={1}
+          ref={scrollBoxRef}
+          viewportCulling
+        >
           {Object.entries(filteredThreads).map(([category, threadList]) => (
             <box
               key={category}
@@ -215,6 +222,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
 
                 return (
                   <ThreadItem
+                    ref={isFocused ? activeItemRef : undefined}
                     key={thread.id}
                     thread={thread}
                     isHovering={isFocused}

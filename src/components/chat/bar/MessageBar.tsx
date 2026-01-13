@@ -294,10 +294,6 @@ const MessageBar = () => {
         textareaRef.current.clear();
       }
     }
-
-    if (key.raw === "\x7F" && messageBarFocused) {
-      textareaRef.current.deleteWordBackward();
-    }
   });
 
   const handleSubmit = (e: SubmitEvent) => {
@@ -337,6 +333,11 @@ const MessageBar = () => {
             keyBindings={[
               { name: "return", action: "submit" },
               { name: "return", shift: true, action: "newline" },
+              {
+                name: "backspace",
+                meta: true,
+                action: "delete-word-backward",
+              },
             ]}
             onSubmit={(e) => handleSubmit(e)}
             ref={textareaRef}

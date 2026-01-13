@@ -37,7 +37,7 @@ const SearchBar = ({
       setSearchQuery("");
     }
 
-    if (key.raw === "\x7F" && searchFocused) {
+    if (key.name === "backspace" && key.option && searchFocused) {
       keyHandledRef.current = true;
       setSearchQuery((old) => removeLastWord(old));
       setTimeout(() => (keyHandledRef.current = false), 0);
