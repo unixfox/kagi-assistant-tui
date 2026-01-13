@@ -3,5 +3,7 @@ export const colors = {
   primaryAlt: "#756da3",
   primaryBorder: "#8e8e8e",
 
+  surfaceHighest: "#5b6097",
+
   background: "#1A1B26",
 };

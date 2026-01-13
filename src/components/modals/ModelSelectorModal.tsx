@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { type AssistantProfile } from "../../lib/data/kagiClient";
 import { prefs, useAppContext } from "../..";
+import Modal from "./Modal";
 
 const ModelSelectorModal = ({ show }: { show: boolean }) => {
   const { client, setSelectedProfile, setShowModelSelectorModal } =
@@ -30,26 +31,8 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
     }));
   }, [models]);
 
-  if (!show) return null;
-
   return (
-    <box
-      border
-      style={{
-        position: "absolute",
-        left: "50%",
-        top: "30%",
-        width: 60,
-        height: 30,
-        marginLeft: -30,
-        marginTop: -7,
-        border: true,
-        borderStyle: "double",
-        backgroundColor: "#5b6097",
-        padding: 2,
-        zIndex: 100,
-      }}
-    >
+    <Modal show={show}>
       <text>
         <strong>Select a model:</strong>
       </text>
@@ -72,7 +55,7 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
         options={options}
         style={{ flexGrow: 1 }}
       />
-    </box>
+    </Modal>
   );
 };
 
