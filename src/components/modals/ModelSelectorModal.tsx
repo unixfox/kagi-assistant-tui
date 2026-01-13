@@ -51,9 +51,10 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
       }}
     >
       <text>
-        <strong>Choose a model:</strong>
+        <strong>Select a model:</strong>
       </text>
       <select
+        marginTop={1}
         focused
         onSelect={(_, value) => {
           const selected =

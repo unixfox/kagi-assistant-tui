@@ -260,6 +260,13 @@ const MessageBar = () => {
   useKeyboard((key) => {
     if (key.name === "o" && key.ctrl) {
       newChat();
+      return;
+    }
+
+    if (key.name === "c" && key.ctrl) {
+      if (textareaRef.current) {
+        textareaRef.current.clear();
+      }
     }
   });
 
@@ -279,21 +286,29 @@ const MessageBar = () => {
   };
 
   return (
-    <box marginBottom={1}>
-      <box backgroundColor="#222436" flexDirection="row" gap={1} padding={1}>
+    <box marginBottom={2}>
+      <box
+        backgroundColor="#222436"
+        flexDirection="row"
+        gap={1}
+        minHeight={5}
+        marginBottom={1}
+      >
         <box height="100%" width={1} backgroundColor="#C098FF" />
-        <textarea
-          keyBindings={[
-            { name: "return", action: "submit" },
-            { name: "return", shift: true, action: "newline" },
-          ]}
-          onSubmit={handleSubmit}
-          ref={textareaRef}
-          width="100%"
-          minHeight={5}
-          placeholder="Ask Assistant..."
-          focused={messageBarFocused}
-        ></textarea>
+        <box height="100%" width="100%" padding={1}>
+          <textarea
+            keyBindings={[
+              { name: "return", action: "submit" },
+              { name: "return", shift: true, action: "newline" },
+            ]}
+            onSubmit={handleSubmit}
+            ref={textareaRef}
+            width="100%"
+            maxHeight={10}
+            placeholder="Ask Assistant..."
+            focused={messageBarFocused}
+          />
+        </box>
       </box>
       {selectedProfile && (
         <text>
