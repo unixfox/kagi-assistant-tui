@@ -1,4 +1,4 @@
-import { createCliRenderer, TextAttributes } from "@opentui/core";
+import { CliRenderer, createCliRenderer, TextAttributes } from "@opentui/core";
 import { createRoot, useKeyboard } from "@opentui/react";
 import Onboarding from "./screens/onboarding";
 import {
@@ -45,6 +45,9 @@ export interface AppContextProps {
 
   messages: AssistantThreadMessage[];
   setMessages: Dispatch<SetStateAction<AssistantThreadMessage[]>>;
+
+  currentThreadTitle: string | null;
+  setCurrentThreadTitle: Dispatch<SetStateAction<string | null>>;
 }
 
 const AppContext = createContext<AppContextProps>({} as AppContextProps);
@@ -53,7 +56,7 @@ export const useAppContext = () => useContext(AppContext);
 
 export const prefs = await initPreferences();
 
-function App() {
+function App({ renderer }: { renderer: CliRenderer }) {
   const [screen, setScreen] = useState(Screen.Pending);
   const [client, setClient] = useState<AssistantClient | null>(null);
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
@@ -63,6 +66,9 @@ function App() {
     useState<AssistantProfile | null>(null);
   const [messagesBoxFocused, setMessagesBoxFocused] = useState(false);
   const [messages, setMessages] = useState<AssistantThreadMessage[]>([]);
+  const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
+    "New Chat",
+  );
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -124,6 +130,12 @@ function App() {
       setMessageBarFocused(true);
       return setMessagesBoxFocused(false);
     }
+
+    if (name === "d" && ctrl) {
+      console.log("^d detected. byeeeeeee");
+      renderer.stop();
+      process.exit(0); // todo make this not shit
+    }
   });
 
   return (
@@ -146,6 +158,8 @@ function App() {
             setMessagesBoxFocused,
             messages,
             setMessages,
+            currentThreadTitle,
+            setCurrentThreadTitle,
           }}
         >
           <MainScreen />
@@ -156,11 +170,11 @@ function App() {
 }
 
 const renderer = await createCliRenderer({
-  targetFps: 60,
+  targetFps: 120,
   exitOnCtrlC: false,
 });
 // renderer.console.toggle();
 renderer.on("selection", (selection) => {
   copyToClipboard(selection?.getSelectedText() ?? "");
 });
-createRoot(renderer).render(<App />);
+createRoot(renderer).render(<App renderer={renderer} />);

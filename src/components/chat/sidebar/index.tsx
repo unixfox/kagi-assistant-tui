@@ -66,14 +66,18 @@ const ChatSidebar = () => {
       flexDirection="column"
       backgroundColor="#222436"
     >
-      <box paddingLeft={1} paddingTop={1}>
-        <ascii-font font="tiny" text="Kagi" />
-      </box>
+      <box paddingTop={2}></box>
 
       {threads ? (
         <scrollbox height="100%" paddingTop={1}>
           {Object.entries(threads).map(([category, threadList]) => (
-            <box key={category} flexDirection="column" style={{ padding: 1 }}>
+            <box
+              key={category}
+              flexDirection="column"
+              paddingLeft={1}
+              paddingRight={1}
+              paddingBottom={1}
+            >
               <text style={{ marginBottom: 1 }}>{category}</text>
               {threadList.map((thread) => {
                 const isSelected = currentThreadId === thread.id;

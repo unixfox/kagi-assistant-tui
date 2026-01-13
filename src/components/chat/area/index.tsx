@@ -19,8 +19,15 @@ import EmptyChatAreaPlaceholder from "./EmptyChatAreaPlaceholder";
 const turndownService = new TurndownService();
 
 const ChatArea = () => {
-  const { client, currentThreadId, messagesBoxFocused, messages, setMessages } =
-    useAppContext();
+  const {
+    client,
+    currentThreadId,
+    currentThreadTitle,
+    setCurrentThreadTitle,
+    messagesBoxFocused,
+    messages,
+    setMessages,
+  } = useAppContext();
   const scrollboxRef = useRef<ScrollBoxRenderable>(null);
   const lastGPressTime = useRef<number>(0);
   const G_TIMEOUT = 500; // Time window in ms for "gg" detection
@@ -51,6 +58,13 @@ const ChatArea = () => {
       );
 
       for await (const chunk of stream) {
+        if (chunk.header === "thread.json") {
+          const json = JSON.parse(chunk.data);
+          if (json.id) {
+            setCurrentThreadTitle(json.title);
+          }
+        }
+
         if (chunk.header === "messages.json") {
           const dtos: MessageDto[] = JSON.parse(chunk.data);
 
@@ -135,22 +149,35 @@ const ChatArea = () => {
       width="100%"
       flexGrow={1}
       // border
-      paddingLeft={3}
-      paddingRight={3}
       flexDirection="column"
     >
-      <scrollbox
-        ref={scrollboxRef}
-        height="100%"
+      <box
         width="100%"
-        focused={messagesBoxFocused}
+        height={3}
+        backgroundColor="#222436"
+        alignItems="center"
+        flexDirection="row"
+        padding={1}
       >
-        {messages.map((msg) => (
-          <ChatMessageComponent message={msg} key={msg.id} />
-        ))}
-        {messages.length === 0 && <EmptyChatAreaPlaceholder />}
-      </scrollbox>
-      <MessageBar />
+        <text width="100%">
+          <strong>{currentThreadTitle}</strong>
+        </text>
+      </box>
+      <box paddingLeft={3} paddingRight={3} flexGrow={1}>
+        <scrollbox
+          ref={scrollboxRef}
+          height="100%"
+          width="100%"
+          focused={messagesBoxFocused}
+          flexGrow={1}
+        >
+          {messages.map((msg) => (
+            <ChatMessageComponent message={msg} key={msg.id} />
+          ))}
+          {messages.length === 0 && <EmptyChatAreaPlaceholder />}
+        </scrollbox>
+        <MessageBar />
+      </box>
     </box>
   );
 };

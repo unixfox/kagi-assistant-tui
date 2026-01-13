@@ -53,6 +53,7 @@ const MessageBar = () => {
     setShowModelSelectorModal,
     selectedProfile,
     setMessagesBoxFocused,
+    setCurrentThreadTitle,
     setCurrentThreadId,
     setMessages,
     messages, // Needed for context awareness (previous message ID)
@@ -220,7 +221,7 @@ const MessageBar = () => {
           const json = JSON.parse(chunk.data);
           if (json.id) {
             setCurrentThreadId(json.id);
-            // If you have a setThreadTitle in context, you would call it here
+            setCurrentThreadTitle(json.title);
           }
         } else if (chunk.header === "location.json") {
           // Branch ID updates
@@ -255,6 +256,7 @@ const MessageBar = () => {
   const newChat = () => {
     setCurrentThreadId(null);
     setMessages([]);
+    setCurrentThreadTitle("New Chat");
   };
 
   useKeyboard((key) => {
