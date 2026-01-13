@@ -301,9 +301,11 @@ const MessageBar = () => {
     } else if (value === "/new") {
       newChat();
     } else if (value === "/logout") {
-      prefs.clear();
-      new Keychain().deleteToken().then(() => {
-        process.exit(0);
+      client.deleteSession().then(() => {
+        prefs.clear();
+        new Keychain().deleteToken().then(() => {
+          process.exit(0);
+        });
       });
     } else {
       // Call the implementation
