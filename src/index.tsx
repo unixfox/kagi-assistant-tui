@@ -102,7 +102,7 @@ function App({ renderer }: { renderer: CliRenderer }) {
   }, []);
 
   useKeyboard((key) => {
-    const { name, ctrl } = key;
+    const { name, ctrl, shift } = key;
 
     if (name === "escape" || (name === "x" && ctrl)) {
       setShowModelSelectorModal(false);
@@ -145,6 +145,17 @@ function App({ renderer }: { renderer: CliRenderer }) {
 
     if (name === "b" && ctrl) {
       setShowSidebar((val) => !val);
+      return;
+    }
+
+    if (name === "f12") {
+      renderer.console.toggle();
+      return;
+    }
+
+    if (name === "f3") {
+      renderer.toggleDebugOverlay();
+      return;
     }
   });
 
@@ -185,7 +196,6 @@ const renderer = await createCliRenderer({
   targetFps: 120,
   exitOnCtrlC: false,
 });
-renderer.console.toggle();
 renderer.on("selection", (selection) => {
   copyToClipboard(selection?.getSelectedText() ?? "");
 });
