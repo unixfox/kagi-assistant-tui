@@ -15,11 +15,7 @@ import {
   convertDetailsToBlockquote,
   preprocessCodeBlocks,
 } from "../../../lib/preprocess";
-import { removeLastWord } from "../../../lib/manip";
-
-// --- Helper Functions ---
-
-const turndownService = new TurndownService();
+import turndownService from "../../../lib/tdown";
 
 function parseReferencesHtml(html: string): Citation[] {
   const $ = cheerio.load(html);

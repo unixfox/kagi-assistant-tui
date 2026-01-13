@@ -13,8 +13,7 @@ import {
   type AssistantThreadMessage,
   type MessageDto,
 } from "../../../lib/data/kagiClient";
-const turndownService = new TurndownService();
-import TurndownService from "turndown";
+import turndownService from "../../../lib/tdown";
 
 const ChatSidebar = ({ show }: { show: boolean }) => {
   const {
