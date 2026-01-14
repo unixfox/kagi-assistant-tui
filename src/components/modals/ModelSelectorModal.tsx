@@ -4,17 +4,17 @@ import { prefs, useAppContext } from "../..";
 import { useKeyboard } from "@opentui/react";
 import Modal from "./Modal";
 import { removeLastWord } from "../../lib/manip";
-
 const MAX_RECENT_MODELS = 5;
-
 const ModelSelectorModal = ({ show }: { show: boolean }) => {
   const { client, setSelectedProfile, setShowModelSelectorModal } =
     useAppContext();
-
   const [models, setModels] = useState<AssistantProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const keyHandledRef = useRef(false);
+
+  // Ref for the scrollbox to access its scrolling methods
+  const scrollRef = useRef<any>(null);
 
   useEffect(() => {
     if (!show) return;
@@ -26,6 +26,27 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
   useEffect(() => {
     setSelectedIndex(0);
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const scroll = scrollRef.current;
+    const children = scroll.getChildren();
+    const target = children[selectedIndex];
+    if (!target) return;
+    const y = target.y - scroll.y;
+    // Use the actual height of the target element
+    const targetHeight = target.height || 3;
+    // Check if the BOTTOM of the item is past the scrollbox height
+    if (y + targetHeight > scroll.height) {
+      scroll.scrollBy(y + targetHeight - scroll.height);
+    } else if (y < 0) {
+      // Scroll up if the top is cut off
+      scroll.scrollBy(y);
+      if (selectedIndex === 0) {
+        scroll.scrollTo(0);
+      }
+    }
+  }, [selectedIndex]);
 
   const loadModels = async () => {
     try {
@@ -39,7 +60,6 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
   const options = useMemo(() => {
     const recentModels = prefs.get<string[]>("recent_models", []);
     const recentModelSet = new Set(recentModels);
-
     const recentOptions: Array<{
       name: string;
       description: string;
@@ -52,7 +72,6 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
       value: string;
       isRecent?: boolean;
     }> = [];
-
     models.forEach((model) => {
       const option = {
         name: model.name,
@@ -60,18 +79,15 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
         value: model.name,
         isRecent: false,
       };
-
       if (recentModelSet.has(model.name)) {
         recentOptions.push({ ...option, isRecent: true });
       } else {
         otherOptions.push(option);
       }
     });
-
     recentOptions.sort(
       (a, b) => recentModels.indexOf(a.name) - recentModels.indexOf(b.name),
     );
-
     return [...recentOptions, ...otherOptions];
   }, [models]);
 
@@ -88,7 +104,6 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
   useKeyboard(
     (key) => {
       if (!show) return;
-
       if (key.name === "up") {
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
       } else if (key.name === "down") {
@@ -120,21 +135,16 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
 
   const handleSelect = (option: (typeof options)[0]) => {
     if (!option) return;
-
     const selected = models.find((m) => m.name === option.name) ?? null;
-
     setSelectedProfile(selected);
     setShowModelSelectorModal(false);
-
     prefs.set("selected_profile", JSON.stringify(selected));
-
     const recentModels = prefs.get<string[]>("recent_models", []);
     const updatedRecent = [
       option.name,
       ...recentModels.filter((m) => m !== option.name),
     ].slice(0, MAX_RECENT_MODELS);
     prefs.set("recent_models", updatedRecent);
-
     prefs.save().then(() => {
       "selected profile saved to prefs";
     });
@@ -157,6 +167,7 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
         />
       </box>
       <scrollbox
+        ref={scrollRef}
         style={{
           flexGrow: 1,
         }}
@@ -197,5 +208,4 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
     </Modal>
   );
 };
-
 export default ModelSelectorModal;
