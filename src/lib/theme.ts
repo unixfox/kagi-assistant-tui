@@ -4,6 +4,8 @@ export const colors = {
   primaryBorder: "#8e8e8e",
 
   surfaceHighest: "#5b6097",
+  surface: "#222436",
+  surfaceHighestMuted: "#393742",
 
   background: "#1A1B26",
 };

@@ -6,6 +6,7 @@ import ChatMessageComponent from "../message";
 import MessageBar from "../bar/MessageBar";
 import EmptyChatAreaPlaceholder from "./EmptyChatAreaPlaceholder";
 import "opentui-spinner/react";
+import { colors } from "../../../lib/theme";
 
 const ChatArea = () => {
   const {
@@ -76,12 +77,12 @@ const ChatArea = () => {
       <box
         width="100%"
         height={3}
-        backgroundColor="#222436"
+        backgroundColor={colors.surface}
         alignItems="center"
         flexDirection="row"
         padding={1}
       >
-        <text width="100%">
+        <text width="100%" marginLeft={2}>
           <strong>{currentThreadTitle}</strong>
         </text>
       </box>

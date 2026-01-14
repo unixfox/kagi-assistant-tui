@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { type AssistantThread } from "../../../lib/data/kagiClient";
 import { forwardRef } from "react";
+import { colors } from "../../../lib/theme";
 interface ThreadItemProps {
   thread: AssistantThread;
   isHovering: boolean;
@@ -14,11 +15,11 @@ const ThreadItem = forwardRef(
   ({ thread, isHovering, isSelected }: ThreadItemProps, ref) => {
     const backgroundColor = useMemo(() => {
       if (isSelected) {
-        return "#5B6097";
+        return colors.surfaceHighest;
       }
 
       if (isHovering) {
-        return "#393742";
+        return colors.surfaceHighestMuted;
       }
 
       return "transparent";

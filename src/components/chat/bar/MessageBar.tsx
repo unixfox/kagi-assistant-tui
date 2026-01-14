@@ -16,6 +16,7 @@ import {
 } from "../../../lib/preprocess";
 import turndownService from "../../../lib/tdown";
 import { Keychain } from "../../../lib/data/keychain";
+import { colors } from "../../../lib/theme";
 
 function parseReferencesHtml(html: string): Citation[] {
   const $ = cheerio.load(html);
@@ -321,13 +322,13 @@ const MessageBar = () => {
   return (
     <box marginBottom={2}>
       <box
-        backgroundColor="#222436"
+        backgroundColor={colors.surface}
         flexDirection="row"
         gap={1}
         minHeight={5}
         marginBottom={1}
       >
-        <box height="100%" width={1} backgroundColor="#5B6097" />
+        <box height="100%" width={1} backgroundColor={colors.primaryAlt} />
         <box height="100%" width="100%" padding={1}>
           <textarea
             keyBindings={[

@@ -15,6 +15,7 @@ import {
 } from "../../../lib/data/kagiClient";
 import turndownService from "../../../lib/tdown";
 import "opentui-spinner/react";
+import { colors } from "../../../lib/theme";
 
 const ChatSidebar = ({ show }: { show: boolean }) => {
   const {
@@ -176,7 +177,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
       height="100%"
       width="25%"
       flexDirection="column"
-      backgroundColor="#222436"
+      backgroundColor={colors.surface}
     >
       {/* Search Bar */}
       <SearchBar

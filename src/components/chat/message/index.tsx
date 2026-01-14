@@ -2,6 +2,7 @@ import {
   AssistantThreadMessageRole,
   type AssistantThreadMessage,
 } from "../../../lib/data/kagiClient";
+import { colors } from "../../../lib/theme";
 import Markdown from "../../Markdown";
 import "opentui-spinner/react";
 
@@ -30,7 +31,7 @@ const ChatMessageComponent = ({
           }
           backgroundColor={
             message.role === AssistantThreadMessageRole.USER
-              ? "#5B6097"
+              ? colors.surfaceHighest
               : "transparent"
           }
           paddingLeft={message.role === AssistantThreadMessageRole.USER ? 2 : 1}
@@ -52,7 +53,10 @@ const ChatMessageComponent = ({
             <>
               {!message.finishedGenerating &&
               message.markdownContent?.trim().length === 0 ? (
-                <spinner name="simpleDotsScrolling" color="#5B6097" />
+                <spinner
+                  name="simpleDotsScrolling"
+                  color={colors.surfaceHighest}
+                />
               ) : (
                 <Markdown
                   content={message.markdownContent || "*Empty message*"}

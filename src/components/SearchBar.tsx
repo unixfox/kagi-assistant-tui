@@ -1,6 +1,7 @@
 import { useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useKeyboard } from "@opentui/react";
 import { removeLastWord } from "../lib/manip";
+import { colors } from "../lib/theme";
 
 interface SearchBarProps {
   searchQuery: string;
@@ -47,13 +48,12 @@ const SearchBar = ({
   return (
     <box
       style={{
-        border: true,
-        borderStyle: "single",
-        borderColor: "white",
-        backgroundColor: "#5B6097",
+        backgroundColor: colors.surfaceHighest,
         height: 3,
         paddingLeft: 1,
         paddingRight: 1,
+        flexDirection: "row",
+        alignItems: "center",
       }}
     >
       <input
@@ -65,7 +65,7 @@ const SearchBar = ({
         focused={searchFocused}
         onSubmit={onSubmit}
         width="100%"
-        backgroundColor="#5B6097"
+        backgroundColor="transparent"
         placeholderColor="#ccc"
         height={1}
       />
