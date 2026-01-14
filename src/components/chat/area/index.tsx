@@ -44,13 +44,6 @@ const ChatArea = () => {
     }
   }, [currentThreadId]);
 
-  // // Auto-scroll to bottom when messages change
-  // useEffect(() => {
-  //   if (messages.length > 0) {
-  //     scrollToBottom();
-  //   }
-  // }, [messages, scrollToBottom]);
-
   // Handle keyboard shortcuts for scrolling
   useKeyboard((key) => {
     if (!messagesBoxFocused) return;
@@ -112,6 +105,11 @@ const ChatArea = () => {
               width="100%"
               focused={messagesBoxFocused}
               flexGrow={1}
+              scrollbarOptions={{
+                trackOptions: {
+                  backgroundColor: "transparent",
+                },
+              }}
             >
               {messages.map((msg) => (
                 <ChatMessageComponent message={msg} key={msg.id} />

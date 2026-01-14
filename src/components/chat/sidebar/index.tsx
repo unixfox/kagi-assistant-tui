@@ -203,6 +203,11 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
           paddingTop={1}
           ref={scrollBoxRef}
           viewportCulling
+          scrollbarOptions={{
+            trackOptions: {
+              backgroundColor: "transparent",
+            },
+          }}
         >
           {Object.entries(filteredThreads).map(([category, threadList]) => (
             <box

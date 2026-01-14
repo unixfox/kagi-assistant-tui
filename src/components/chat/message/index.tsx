@@ -33,9 +33,16 @@ const ChatMessageComponent = ({
               ? "#5B6097"
               : "transparent"
           }
-          paddingLeft={1}
-          paddingRight={1}
-          border={message.role === AssistantThreadMessageRole.USER}
+          paddingLeft={message.role === AssistantThreadMessageRole.USER ? 2 : 1}
+          paddingRight={
+            message.role === AssistantThreadMessageRole.USER ? 2 : 1
+          }
+          paddingTop={message.role === AssistantThreadMessageRole.USER ? 1 : 0}
+          paddingBottom={
+            message.role === AssistantThreadMessageRole.USER ? 1 : 0
+          }
+
+          // border={message.role === AssistantThreadMessageRole.USER}
         >
           {message.role === AssistantThreadMessageRole.USER ? (
             <text width="100%" fg="white">

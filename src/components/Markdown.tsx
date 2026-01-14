@@ -1,4 +1,3 @@
-import { Box, Text, Code } from "@opentui/react";
 import { marked, type Tokens, type Token } from "marked";
 import { RGBA, SyntaxStyle } from "@opentui/core";
 
@@ -66,15 +65,15 @@ const Markdown = ({ content, theme: userTheme }: MarkdownProps) => {
       const position = match.index; // Position where this details block starts
 
       // Extract summary and content
-      const summaryMatch = fullContent.match(/<summary>([\s\S]*?)<\/summary>/);
-      const summary = summaryMatch ? summaryMatch[1].trim() : "Details";
+      const summaryMatch = fullContent?.match(/<summary>([\s\S]*?)<\/summary>/);
+      const summary = summaryMatch ? (summaryMatch[1] || "").trim() : "Details";
       const contentAfterSummary = summaryMatch
-        ? fullContent.replace(/<summary>[\s\S]*?<\/summary>/, "")
+        ? fullContent?.replace(/<summary>[\s\S]*?<\/summary>/, "")
         : fullContent;
 
       detailsBlocks.push({
         summary,
-        content: contentAfterSummary.trim(),
+        content: (contentAfterSummary || "").trim(),
         position,
       });
     }
@@ -121,7 +120,7 @@ const Markdown = ({ content, theme: userTheme }: MarkdownProps) => {
           // TUI doesn't support clickable links natively in standard terminals easily,
           // but we can style them.
           return (
-            <span key={key} fg={theme.link.fg} underline={theme.link.underline}>
+            <span key={key} fg={theme.link.fg}>
               {(token as Tokens.Link).text}
             </span>
           );
@@ -162,13 +161,7 @@ const Markdown = ({ content, theme: userTheme }: MarkdownProps) => {
         return (
           <box key={key} paddingTop={1} paddingBottom={1}>
             <text>
-              <span
-                fg={style.fg}
-                bold={style.bold as any}
-                underline={style.underline as any}
-              >
-                {renderInline(headingToken.tokens)}
-              </span>
+              <span fg={style.fg}>{renderInline(headingToken.tokens)}</span>
             </text>
           </box>
         );
@@ -224,9 +217,9 @@ const Markdown = ({ content, theme: userTheme }: MarkdownProps) => {
       case "list": {
         const listToken = token as Tokens.List;
         return (
-          <box key={key} flexDirection="column" marginBottom={1}>
+          <box key={key} flexDirection="column">
             {listToken.items.map((item, i) => (
-              <box key={i} flexDirection="row">
+              <box key={i} flexDirection="row" marginBottom={1}>
                 <text>
                   <span fg="gray">
                     {listToken.ordered ? `${i + 1}. ` : "• "}
@@ -319,7 +312,7 @@ const Markdown = ({ content, theme: userTheme }: MarkdownProps) => {
   };
 
   return (
-    <box flexDirection="column">
+    <box flexDirection="column" columnGap={1}>
       {/* Render details blocks first (thinking content typically appears at the top) */}
       {detailsBlocks
         .sort((a, b) => a.position - b.position)
