@@ -10,10 +10,13 @@ const EmptyChatAreaPlaceholder = () => {
             ctrl+m <strong bg="#3b3c52">select model</strong>
           </text>
           <text>
+            ctrl+f <strong bg="#3b3c52">search chats</strong>
+          </text>
+          <text>
             ctrl+g <strong bg="#3b3c52">focus messages box</strong>
           </text>
           <text>
-            ctrl+f <strong bg="#3b3c52">search chats</strong>
+            ctrl+b <strong bg="#3b3c52">toggle sidebar</strong>
           </text>
           <text>
             / <strong bg="#3b3c52">focus input</strong>
