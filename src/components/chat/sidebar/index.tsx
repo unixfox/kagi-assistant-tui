@@ -35,8 +35,30 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
   const [focusedThreadIndex, setFocusedThreadIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
-  const scrollBoxRef = useRef<any>(null); // Type as ScrollBoxRenderable if imported
-  const activeItemRef = useRef<any>(null); // Type as BoxRenderable if imported
+  const scrollBoxRef = useRef<any>(null);
+  const activeItemRef = useRef<any>(null);
+
+  useEffect(() => {
+    const scroll = scrollBoxRef.current;
+    const target = activeItemRef.current;
+    if (!scroll || !target) return;
+    // Calculate the target's Y relative to the scrollbox's internal content
+    // We use the absolute Y of both to find the relative offset
+    const relativeY = target.y - scroll.y;
+    const targetHeight = target.height || 3; // ThreadItem height + margin
+    if (relativeY + targetHeight > scroll.height) {
+      // Scroll down: item is below the visible viewport
+      scroll.scrollBy(relativeY + targetHeight - scroll.height);
+    } else if (relativeY < 0) {
+      // Scroll up: item is above the visible viewport
+      scroll.scrollBy(relativeY);
+
+      // Optional: Snap to top if it's the very first item in the flat list
+      if (focusedThreadIndex === 0) {
+        scroll.scrollTo(0);
+      }
+    }
+  }, [focusedThreadIndex]);
 
   const loadThreads = async () => {
     try {
