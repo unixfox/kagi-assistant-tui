@@ -99,16 +99,15 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
     return threadsToUse ? Object.values(threadsToUse).flat() : [];
   }, [threads, filteredThreads, searchQuery]);
 
+  const isTarget = !(
+    messageBarFocused ||
+    showModelSelectorModal ||
+    messagesBoxFocused ||
+    searchFocused
+  );
   // Handle keyboard navigation for thread selection
   useKeyboard((key) => {
-    if (
-      !flatThreads.length ||
-      messageBarFocused ||
-      showModelSelectorModal ||
-      messagesBoxFocused ||
-      searchFocused
-    )
-      return;
+    if (!flatThreads.length || !isTarget) return;
 
     if (key.name === "up" || key.name === "k") {
       setFocusedThreadIndex((prev) => Math.max(0, prev - 1));
@@ -253,7 +252,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
                     ref={isFocused ? activeItemRef : undefined}
                     key={thread.id}
                     thread={thread}
-                    isHovering={isFocused}
+                    isHovering={isFocused && isTarget}
                     isSelected={isSelected}
                     onClick={() => {
                       console.log(`thread ${thread.id} just got clicked`);
