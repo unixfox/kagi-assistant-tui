@@ -31,8 +31,11 @@ const Modal = (props: ModalProps) => {
           height: 30,
           marginLeft: -30,
           marginTop: -7,
-          backgroundColor: colors.surfaceHighest,
-          padding: 2,
+          backgroundColor: colors.surface,
+          paddingTop: 2,
+          paddingBottom: 2,
+          paddingLeft: 5,
+          paddingRight: 5,
           zIndex: 100,
         }}
       >

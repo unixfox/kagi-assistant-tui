@@ -278,8 +278,23 @@ export class AssistantClient {
       if (chunk.header === "profiles.json") {
         try {
           const parsed = JSON.parse(chunk.data);
-          if (parsed.profiles && Array.isArray(parsed.profiles)) {
-            profiles.push(...parsed.profiles);
+          // if (parsed.profiles && Array.isArray(parsed.profiles)) {
+          //   profiles.push(...parsed.profiles);
+          // }
+
+          for (const profile of parsed.profiles) {
+            profiles.push({
+              id: profile.id,
+              name: profile.name,
+              description: decodeHTMLEntities(
+                (await extractModelInfoDescription(profile.model_info)) || "",
+              ),
+
+              avatar: "",
+              color: "",
+              family: profile.family,
+              model: profile.model,
+            });
           }
         } catch (e) {
           console.error("Error parsing profiles JSON", e);
@@ -478,4 +493,45 @@ export function parseMetadata(html: string): Record<string, string> {
   });
 
   return metadata;
+}
+
+async function extractModelInfoDescription(
+  html: string,
+): Promise<string | null> {
+  let firstParagraphText: string | null = null;
+  let isInsideFirstP = false;
+  const rewriter = new HTMLRewriter().on("p", {
+    element() {
+      // Only capture the first <p> we encounter
+      if (firstParagraphText === null) {
+        isInsideFirstP = true;
+        firstParagraphText = "";
+      }
+    },
+    text(text) {
+      if (isInsideFirstP) {
+        firstParagraphText += text.text;
+        // Stop capturing once we reach the end of the text chunks for this element
+        if (text.lastInTextNode) {
+          isInsideFirstP = false;
+        }
+      }
+    },
+  });
+  await rewriter.transform(new Response(html)).text();
+  return firstParagraphText?.trim() ?? null;
+}
+function decodeHTMLEntities(text: string): string {
+  const entities: Record<string, string> = {
+    "&#39;": "'",
+    "&quot;": '"',
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&nbsp;": " ",
+  };
+  return text.replace(
+    /&#39;|&quot;|&amp;|&lt;|&gt;|&nbsp;/g,
+    (match) => entities[match],
+  );
 }
