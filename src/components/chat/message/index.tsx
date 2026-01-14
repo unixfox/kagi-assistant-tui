@@ -58,9 +58,22 @@ const ChatMessageComponent = ({
                   color={colors.surfaceHighest}
                 />
               ) : (
-                <Markdown
-                  content={message.markdownContent || "*Empty message*"}
-                />
+                <>
+                  <Markdown
+                    content={message.markdownContent || "*Empty message*"}
+                  />
+                  <box flexDirection="row" gap={3} opacity={0.5}>
+                    {Object.keys(message.metadata || {})
+                      .filter((k) =>
+                        ["Speed (tok/s)", "Tokens", "Model"].includes(k),
+                      )
+                      .map((k) => (
+                        <text>
+                          <strong>{k}</strong>: {(message.metadata || {})[k]}
+                        </text>
+                      ))}
+                  </box>
+                </>
               )}
             </>
           )}

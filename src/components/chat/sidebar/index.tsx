@@ -1,5 +1,8 @@
 import { useEffect, useState, useMemo, useRef } from "react";
-import { type AssistantThread } from "../../../lib/data/kagiClient";
+import {
+  parseMetadata,
+  type AssistantThread,
+} from "../../../lib/data/kagiClient";
 import { useAppContext } from "../../..";
 import { useKeyboard } from "@opentui/react";
 import ThreadItem from "./ThreadItem";
@@ -178,7 +181,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
                 branchIds: dto.branch_list,
                 finishedGenerating: true,
                 markdownContent: md,
-                // markdownContent: dto.md,
+                metadata: parseMetadata(dto.metadata || ""),
               } as AssistantThreadMessage,
             ]);
           }
