@@ -154,13 +154,6 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
           const dtos: MessageDto[] = JSON.parse(chunk.data);
 
           for (const dto of dtos) {
-            const md = turndownService.turndown(
-              await preprocessCodeBlocks(
-                await convertDetailsToBlockquote(dto.reply || ""),
-              ),
-            );
-            console.log(md);
-
             setMessages((prev) => [
               ...prev,
               {
@@ -180,7 +173,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
                 documents: [],
                 branchIds: dto.branch_list,
                 finishedGenerating: true,
-                markdownContent: md,
+                markdownContent: dto.md,
                 metadata: parseMetadata(dto.metadata || ""),
               } as AssistantThreadMessage,
             ]);

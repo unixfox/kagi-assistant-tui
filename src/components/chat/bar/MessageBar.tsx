@@ -76,9 +76,12 @@ const MessageBar = () => {
   const messagesRef = useRef(messages);
   const selectedProfileRef = useRef(selectedProfile);
 
+  const [withInternet, setWithInternet] = useState(false);
+
   const [attachments, setAttachments] = useState<MessageBarAttachment[]>([]);
 
   const attachmentsRef = useRef(attachments);
+  const withInternetRef = useRef(withInternet);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -95,6 +98,10 @@ const MessageBar = () => {
   useEffect(() => {
     attachmentsRef.current = attachments;
   }, [attachments]);
+
+  useEffect(() => {
+    withInternetRef.current = withInternet;
+  }, [withInternet]);
 
   // Core logic adapted from Kotlin MainViewModel.sendMessage
   const handleSendMessage = async (text: string) => {
@@ -159,7 +166,7 @@ const MessageBar = () => {
       },
       profile: {
         id: selectedProfile?.id || null,
-        internet_access: false, // Defaulting based on typical usage, could be a toggle
+        internet_access: withInternetRef.current,
         lens_id: null,
         model: selectedProfile?.model || "Kagi Assistant", // Fallback
         personalizations: false,
@@ -396,6 +403,11 @@ const MessageBar = () => {
 
     if (key.name === "v" && key.ctrl) {
       handlePasteImage();
+      return;
+    }
+
+    if (key.name === "s" && key.ctrl) {
+      setWithInternet((i) => !i);
     }
   });
 
@@ -424,6 +436,19 @@ const MessageBar = () => {
   return (
     <box marginBottom={2} flexDirection="column">
       <box width="100%" flexDirection="row" gap={1} height={1}>
+        {withInternet && (
+          <box
+            backgroundColor="#FF966C"
+            justifyContent="center"
+            alignItems="center"
+            paddingLeft={1}
+            paddingRight={1}
+          >
+            <text fg="black">
+              <strong>❄ Internet</strong>
+            </text>
+          </box>
+        )}
         {attachments.map((a) => (
           <box
             key={a.name}
