@@ -4,6 +4,10 @@ Kagi Assistant in your terminal.
 
 This client isn't as polished as my [Kagi Assistant for Android](https://github.com/httpjamesm/KagiAssistant) app. I just wanted to make a fun TUI.
 
+https://github.com/user-attachments/assets/9b294cf1-57e4-4193-9840-b1c4423e58d9
+
+
+
 ## Development
 
 To install dependencies:
