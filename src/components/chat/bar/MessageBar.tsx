@@ -9,6 +9,7 @@ import {
   type AssistantThreadMessage,
   type Citation,
   type MessageDto,
+  type MultipartAssistantPromptFile,
 } from "../../../lib/data/kagiClient";
 import type { SubmitEvent } from "@opentui/core";
 import {
@@ -190,11 +191,16 @@ const MessageBar = () => {
       if (attachmentsRef.current.length > 0) {
         const multipartFiles = attachmentsRef.current.map((a) => {
           const f = Bun.file(a.path);
-          return {
+          let nf: MultipartAssistantPromptFile = {
             file: f,
-            thumbnail: Bun.file(a.thumbnailPath),
             mime: f.type,
           };
+
+          if (f.type.startsWith("image/")) {
+            nf.thumbnail = Bun.file(a.thumbnailPath);
+          }
+
+          return nf;
         });
 
         stream = client.sendMultipartRequest(url, requestBody, multipartFiles);
