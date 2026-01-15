@@ -1,3 +1,4 @@
+import { tmpdir } from "node:os";
 import { useKeyboard } from "@opentui/react";
 import { useEffect, useRef, useState } from "react";
 import * as cheerio from "cheerio";
@@ -17,7 +18,10 @@ import {
 import turndownService from "../../../lib/tdown";
 import { Keychain } from "../../../lib/data/keychain";
 import { colors } from "../../../lib/theme";
-
+import { randomUUID } from "node:crypto";
+import { saveClipboardImage } from "../../../lib/clipboard";
+import { join } from "node:path";
+import { createThumbnailFromImage } from "../../../lib/thumbs";
 function parseReferencesHtml(html: string): Citation[] {
   const $ = cheerio.load(html);
   return $("ol[data-ref-list] > li > a[href]")
@@ -39,7 +43,17 @@ function parseMetadata(html: string): Record<string, string> {
   return metadata;
 }
 
-// --- Component ---
+enum MessageBarAttachmentSource {
+  CLIPBOARD,
+}
+
+interface MessageBarAttachment {
+  name: string;
+  path: string;
+  source: MessageBarAttachmentSource;
+  sizeBytes: number;
+  thumbnailPath: string;
+}
 
 const MessageBar = () => {
   const textareaRef = useRef<any>(null);
@@ -61,6 +75,10 @@ const MessageBar = () => {
   const messagesRef = useRef(messages);
   const selectedProfileRef = useRef(selectedProfile);
 
+  const [attachments, setAttachments] = useState<MessageBarAttachment[]>([]);
+
+  const attachmentsRef = useRef(attachments);
+
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
@@ -73,9 +91,15 @@ const MessageBar = () => {
     currentThreadIdRef.current = currentThreadId;
   }, [currentThreadId]);
 
+  useEffect(() => {
+    attachmentsRef.current = attachments;
+  }, [attachments]);
+
   // Core logic adapted from Kotlin MainViewModel.sendMessage
   const handleSendMessage = async (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim() && !attachmentsRef.current.length) return;
+
+    setAttachments([]);
 
     // 1. Setup IDs
     let messageId = crypto.randomUUID();
@@ -162,9 +186,23 @@ const MessageBar = () => {
     console.log(`sending ${jsonString}`);
 
     try {
-      const stream = client.fetchStream(url, jsonString, "POST", {
-        "Content-Type": "application/json",
-      });
+      let stream;
+      if (attachmentsRef.current.length > 0) {
+        const multipartFiles = attachmentsRef.current.map((a) => {
+          const f = Bun.file(a.path);
+          return {
+            file: f,
+            thumbnail: Bun.file(a.thumbnailPath),
+            mime: f.type,
+          };
+        });
+
+        stream = client.sendMultipartRequest(url, requestBody, multipartFiles);
+      } else {
+        stream = client.fetchStream(url, jsonString, "POST", {
+          "Content-Type": "application/json",
+        });
+      }
 
       // Helper to update specific message in state safely
       const updateMessageById = (
@@ -282,6 +320,52 @@ const MessageBar = () => {
     setCurrentThreadId(null);
     setMessages([]);
     setCurrentThreadTitle("New Chat");
+    setAttachments([]);
+  };
+
+  const handlePasteImage = async () => {
+    const dir = tmpdir();
+    const uuid = randomUUID();
+    const out = join(dir, uuid + ".jpg");
+    try {
+      await saveClipboardImage(out);
+    } catch (e) {
+      console.error(
+        "Failed to save clipboard image. Probably never had one anyways.",
+      );
+      return;
+    }
+
+    const f = Bun.file(out);
+    const size = f.size;
+
+    const sum =
+      attachments.reduce((acc, curr) => acc + curr.sizeBytes, 0) + size;
+
+    if (sum >= 16 * 1000 * 1000) {
+      return;
+    }
+
+    const thumbnailPath = join(dir, `${randomUUID()}.webp`);
+
+    if (out.endsWith(".jpg")) {
+      try {
+        await createThumbnailFromImage(out, thumbnailPath);
+      } catch (e) {
+        console.error(`Failed to create thumbnail for ${out}.`);
+      }
+    }
+
+    setAttachments((prev) => [
+      ...prev,
+      {
+        name: `clipboard-${attachments.filter((a) => a.source === MessageBarAttachmentSource.CLIPBOARD).length}.jpg`,
+        path: out,
+        source: MessageBarAttachmentSource.CLIPBOARD,
+        sizeBytes: size,
+        thumbnailPath,
+      },
+    ]);
   };
 
   useKeyboard((key) => {
@@ -290,10 +374,22 @@ const MessageBar = () => {
       return;
     }
 
-    if (key.name === "c" && key.ctrl && messageBarFocused) {
+    if (!messageBarFocused) return;
+
+    if (key.name === "c" && key.ctrl) {
       if (textareaRef.current) {
         textareaRef.current.clear();
       }
+      return;
+    }
+
+    if (key.name === "backspace" && textareaRef.current.plainText.length <= 0) {
+      setAttachments((prev) => prev.slice(0, -1));
+      return;
+    }
+
+    if (key.name === "v" && key.ctrl) {
+      handlePasteImage();
     }
   });
 
@@ -320,13 +416,29 @@ const MessageBar = () => {
   };
 
   return (
-    <box marginBottom={2}>
+    <box marginBottom={2} flexDirection="column">
+      <box width="100%" flexDirection="row" gap={1} height={1}>
+        {attachments.map((a) => (
+          <box
+            key={a.name}
+            backgroundColor="#FF966C"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <text fg="black">
+              <strong>[{a.name}]</strong>
+            </text>
+          </box>
+        ))}
+      </box>
+
       <box
         backgroundColor={colors.surface}
         flexDirection="row"
         gap={1}
         minHeight={5}
         marginBottom={1}
+        marginTop={1}
       >
         <box height="100%" width={1} backgroundColor={colors.primaryAlt} />
         <box height="100%" width="100%" padding={1}>
@@ -349,12 +461,28 @@ const MessageBar = () => {
           />
         </box>
       </box>
-      {selectedProfile && (
-        <text>
-          <strong>Model</strong>:{selectedProfile?.family}{" "}
-          {selectedProfile?.name}
-        </text>
-      )}
+      <box
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        width="100%"
+        marginBottom={1}
+      >
+        <box width="90%">
+          {selectedProfile && (
+            <text>
+              <strong>Model</strong>:{selectedProfile?.family}{" "}
+              {selectedProfile?.name}{" "}
+              <span fg={colors.textSecondary}>(ctrl+m)</span>
+            </text>
+          )}
+        </box>
+        <box flexDirection="row" justifyContent="flex-end">
+          <text>
+            Paste <span fg={colors.textSecondary}>(ctrl+v)</span>
+          </text>
+        </box>
+      </box>
     </box>
   );
 };

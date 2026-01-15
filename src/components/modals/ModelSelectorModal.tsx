@@ -4,6 +4,7 @@ import { prefs, useAppContext } from "../..";
 import { useKeyboard } from "@opentui/react";
 import Modal from "./Modal";
 import { removeLastWord } from "../../lib/manip";
+import { colors } from "../../lib/theme";
 const MAX_RECENT_MODELS = 5;
 const ModelSelectorModal = ({ show }: { show: boolean }) => {
   const { client, setSelectedProfile, setShowModelSelectorModal } =
@@ -196,7 +197,9 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
               <text
                 style={{
                   marginTop: 0,
-                  fg: isSelected ? "#a0aec0" : "#718096",
+                  fg: isSelected
+                    ? colors.textSecondaryHigh
+                    : colors.textSecondary,
                 }}
               >
                 {option.description}

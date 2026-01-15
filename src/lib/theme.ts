@@ -8,4 +8,7 @@ export const colors = {
   surfaceHighestMuted: "#393742",
 
   background: "#1A1B26",
+
+  textSecondary: "#718096",
+  textSecondaryHigh: "#a0aec0",
 };

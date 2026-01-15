@@ -1,4 +1,4 @@
-import type { HeadersInit } from "bun";
+import type { BunFile, HeadersInit } from "bun";
 import * as cheerio from "cheerio";
 
 // --- Types & Interfaces ---
@@ -96,8 +96,8 @@ export interface KagiCompanion {
 }
 
 export interface MultipartAssistantPromptFile {
-  file: File; // Bun/Web File object
-  thumbnail?: File;
+  file: BunFile; // Bun/Web File object
+  thumbnail?: BunFile;
   mime: string;
 }
 
