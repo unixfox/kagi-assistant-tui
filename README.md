@@ -1,4 +1,10 @@
-# react
+# kagi-assistant-tui
+
+Kagi Assistant in your terminal.
+
+This client isn't as polished as my [Kagi Assistant for Android](https://github.com/httpjamesm/KagiAssistant) app. I just wanted to make a fun TUI.
+
+## Development
 
 To install dependencies:
 
