@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import {
   parseMetadata,
+  parseReferencesHtml,
   type AssistantThread,
 } from "../../../lib/data/kagiClient";
 import { useAppContext } from "../../..";
@@ -170,7 +171,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
                 id: `${dto.id}.reply`,
                 content: dto.reply,
                 role: AssistantThreadMessageRole.ASSISTANT,
-                citations: [],
+                citations: parseReferencesHtml(dto.references_html || ""),
                 documents: [],
                 branchIds: dto.branch_list,
                 finishedGenerating: true,

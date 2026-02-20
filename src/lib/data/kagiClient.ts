@@ -495,6 +495,16 @@ export function parseMetadata(html: string): Record<string, string> {
   return metadata;
 }
 
+export function parseReferencesHtml(html: string): Citation[] {
+  const $ = cheerio.load(html);
+  return $("ol[data-ref-list] > li > a[href]")
+    .map((_, el) => ({
+      url: $(el).attr("href") || "",
+      title: $(el).text() || "",
+    }))
+    .get();
+}
+
 async function extractModelInfoDescription(
   html: string,
 ): Promise<string | null> {

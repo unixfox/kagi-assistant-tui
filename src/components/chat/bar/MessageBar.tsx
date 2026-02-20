@@ -1,7 +1,6 @@
 import { tmpdir } from "node:os";
 import { useKeyboard } from "@opentui/react";
 import { useEffect, useRef, useState } from "react";
-import * as cheerio from "cheerio";
 import { prefs, useAppContext } from "../../..";
 import {
   AssistantThreadMessageRole,
@@ -11,6 +10,9 @@ import {
   type Citation,
   type MessageDto,
   type MultipartAssistantPromptFile,
+  type AssistantThread,
+  parseMetadata,
+  parseReferencesHtml,
 } from "../../../lib/data/kagiClient";
 import type { SubmitEvent } from "@opentui/core";
 import {
@@ -24,26 +26,6 @@ import { randomUUID } from "node:crypto";
 import { saveClipboardImage } from "../../../lib/clipboard";
 import { join } from "node:path";
 import { createThumbnailFromImage } from "../../../lib/thumbs";
-function parseReferencesHtml(html: string): Citation[] {
-  const $ = cheerio.load(html);
-  return $("ol[data-ref-list] > li > a[href]")
-    .map((_, el) => ({
-      url: $(el).attr("href") || "",
-      title: $(el).text() || "",
-    }))
-    .get();
-}
-
-function parseMetadata(html: string): Record<string, string> {
-  const $ = cheerio.load(html);
-  const metadata: Record<string, string> = {};
-  $("li").each((_, el) => {
-    const key = $(el).find("span.attribute").text() || "";
-    const value = $(el).find("span.value").text() || "";
-    if (key) metadata[key] = value;
-  });
-  return metadata;
-}
 
 enum MessageBarAttachmentSource {
   CLIPBOARD,
@@ -76,8 +58,8 @@ const MessageBar = () => {
     messageBarFocused,
     setShowModelSelectorModal,
     selectedProfile,
-    withInternet,
-    setWithInternet,
+    webSearchEnabled,
+    setWebSearchEnabled,
     setCurrentThreadTitle,
     setCurrentThreadId,
     setMessages,
@@ -92,7 +74,7 @@ const MessageBar = () => {
   const [attachments, setAttachments] = useState<MessageBarAttachment[]>([]);
 
   const attachmentsRef = useRef(attachments);
-  const withInternetRef = useRef(withInternet);
+  const webSearchRef = useRef(webSearchEnabled);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -111,8 +93,8 @@ const MessageBar = () => {
   }, [attachments]);
 
   useEffect(() => {
-    withInternetRef.current = withInternet;
-  }, [withInternet]);
+    webSearchRef.current = webSearchEnabled;
+  }, [webSearchEnabled]);
 
   // Core logic adapted from Kotlin MainViewModel.sendMessage
   const handleSendMessage = async (text: string) => {
@@ -177,7 +159,7 @@ const MessageBar = () => {
       },
       profile: {
         id: selectedProfile.id || null,
-        internet_access: withInternetRef.current,
+        internet_access: webSearchRef.current,
         lens_id: null,
         model: selectedProfile.model || DEFAULT_PROFILE.model,
         personalizations: false,
@@ -299,16 +281,44 @@ const MessageBar = () => {
           setCurrentThreadTitle(json.title);
           setThreads((prev) => {
             if (!prev) return prev;
-            return Object.fromEntries(
-              Object.entries(prev).map(([category, threads]) => [
-                category,
-                threads.map((thread) =>
-                  thread.id === json.id
-                    ? { ...thread, title: json.title }
-                    : thread,
-                ),
-              ]),
+
+            let exists = false;
+            const updatedEntries = Object.entries(prev).map(
+              ([category, threads]) => {
+                const mapped = threads.map((thread) => {
+                  if (thread.id === json.id) {
+                    exists = true;
+                    return {
+                      ...thread,
+                      title: json.title,
+                      excerpt: json.excerpt || thread.excerpt,
+                    };
+                  }
+                  return thread;
+                });
+                return [category, mapped] as const;
+              },
             );
+
+            if (exists) {
+              return Object.fromEntries(updatedEntries);
+            }
+
+            if (updatedEntries.length === 0) {
+              return prev;
+            }
+
+            const [firstCategory, firstThreads] = updatedEntries[0]!;
+            const newThread: AssistantThread = {
+              id: json.id,
+              title: json.title,
+              excerpt: json.excerpt || json.title || "",
+            };
+
+            return Object.fromEntries([
+              [firstCategory, [newThread, ...firstThreads]],
+              ...updatedEntries.slice(1),
+            ]);
           });
         } else if (chunk.header === "location.json") {
           // Branch ID updates
@@ -446,7 +456,7 @@ const MessageBar = () => {
   return (
     <box marginBottom={2} flexDirection="column">
       <box width="100%" flexDirection="row" gap={1} height={1}>
-        {withInternet && (
+        {webSearchEnabled && (
           <box
             backgroundColor="#FF966C"
             justifyContent="center"
@@ -455,7 +465,7 @@ const MessageBar = () => {
             paddingRight={1}
           >
             <text fg="black">
-              <strong>❄ Internet</strong>
+              <strong>🌐 Web Search</strong>
               <span> (ctrl+o)</span>
             </text>
           </box>
@@ -520,8 +530,8 @@ const MessageBar = () => {
           </text>
           <text>
             <strong>Web Search</strong>:{" "}
-            <span fg={withInternet ? "#74c69d" : colors.textSecondary}>
-              {withInternet ? "On" : "Off"}
+            <span fg={webSearchEnabled ? "#74c69d" : colors.textSecondary}>
+              {webSearchEnabled ? "On" : "Off"}
             </span>
             {" "}
             <span fg={colors.textSecondary}>(ctrl+o)</span>

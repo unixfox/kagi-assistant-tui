@@ -35,8 +35,8 @@ export interface AppContextProps {
   messageBarFocused: boolean;
   setMessageBarFocused: Dispatch<SetStateAction<boolean>>;
 
-  withInternet: boolean;
-  setWithInternet: Dispatch<SetStateAction<boolean>>;
+  webSearchEnabled: boolean;
+  setWebSearchEnabled: Dispatch<SetStateAction<boolean>>;
 
   showModelSelectorModal: boolean;
   setShowModelSelectorModal: Dispatch<SetStateAction<boolean>>;
@@ -94,7 +94,7 @@ function App({ renderer }: { renderer: CliRenderer }) {
     string,
     AssistantThread[]
   > | null>(null);
-  const [withInternet, setWithInternet] = useState(true);
+  const [webSearchEnabled, setWebSearchEnabled] = useState(true);
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -126,7 +126,7 @@ function App({ renderer }: { renderer: CliRenderer }) {
   useKeyboard((key) => {
     const { name, ctrl, shift, meta, option } = key;
     const modelShortcut = ctrl && name === "p";
-    const internetShortcut = ctrl && name === "o";
+    const webSearchShortcut = ctrl && name === "o";
 
     if (name === "c" && ctrl) {
       renderer.stop();
@@ -145,6 +145,11 @@ function App({ renderer }: { renderer: CliRenderer }) {
       setShowModelSelectorModal(true);
       setMessageBarFocused(false);
       setMessagesBoxFocused(false);
+      return;
+    }
+
+    if (webSearchShortcut) {
+      setWebSearchEnabled((prev) => !prev);
       return;
     }
 
@@ -219,8 +224,8 @@ function App({ renderer }: { renderer: CliRenderer }) {
             setCurrentThreadLoading,
             threads,
             setThreads,
-            withInternet,
-            setWithInternet,
+            webSearchEnabled,
+            setWebSearchEnabled,
             searchFocused,
             setSearchFocused,
           }}

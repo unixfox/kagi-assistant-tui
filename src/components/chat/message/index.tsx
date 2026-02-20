@@ -5,12 +5,20 @@ import {
 import { colors } from "../../../lib/theme";
 import Markdown from "../../Markdown";
 import "opentui-spinner/react";
+import { useAppContext } from "../../..";
 
 const ChatMessageComponent = ({
   message,
 }: {
   message: AssistantThreadMessage;
 }) => {
+  const { webSearchEnabled } = useAppContext();
+  const references = message.citations || [];
+  const showReferences =
+    webSearchEnabled &&
+    message.role === AssistantThreadMessageRole.ASSISTANT &&
+    references.length > 0;
+
   return (
     <box width="100%" flexDirection="column" padding={1}>
       <box
@@ -73,6 +81,27 @@ const ChatMessageComponent = ({
                         </text>
                       ))}
                   </box>
+                  {showReferences && (
+                    <box
+                      flexDirection="column"
+                      marginTop={1}
+                      gap={0}
+                      paddingLeft={1}
+                    >
+                      <text>
+                        <strong>References</strong>
+                      </text>
+                      {references.map((citation, index) => {
+                        const label = citation.title || citation.url || "Source";
+                        return (
+                          <text key={`${message.id}-ref-${index}`}>
+                            • {label} [^{index + 1}]
+                            {citation.url ? ` ${citation.url}` : ""}
+                          </text>
+                        );
+                      })}
+                    </box>
+                  )}
                 </>
               )}
             </>
