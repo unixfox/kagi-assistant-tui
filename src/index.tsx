@@ -124,7 +124,7 @@ function App({ renderer }: { renderer: CliRenderer }) {
   }, []);
 
   useKeyboard((key) => {
-    const { name, ctrl, shift, meta, option } = key;
+  const { name, ctrl } = key;
     const modelShortcut = ctrl && name === "p";
     const webSearchShortcut = ctrl && name === "o";
 
@@ -234,10 +234,6 @@ function App({ renderer }: { renderer: CliRenderer }) {
 const renderer = await createCliRenderer({
   targetFps: 120,
   exitOnCtrlC: true,
-  useKittyKeyboard: {
-    disambiguate: true,
-    alternateKeys: true,
-  },
 });
 renderer.on("selection", (selection) => {
   copyToClipboard(selection?.getSelectedText() ?? "");

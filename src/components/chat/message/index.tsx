@@ -93,9 +93,14 @@ const ChatMessageComponent = ({
                       </text>
                       {references.map((citation, index) => {
                         const label = citation.title || citation.url || "Source";
+                        const contribution =
+                          typeof citation.contribution === "number"
+                            ? ` (${citation.contribution}%)`
+                            : "";
                         return (
                           <text key={`${message.id}-ref-${index}`}>
-                            • {label} [^{index + 1}]
+                            • {label}
+                            {contribution} [^{index + 1}]
                             {citation.url ? ` ${citation.url}` : ""}
                           </text>
                         );

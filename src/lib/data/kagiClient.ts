@@ -17,6 +17,7 @@ export enum AssistantThreadMessageRole {
 export interface Citation {
   url: string;
   title: string;
+  contribution?: number;
 }
 
 export interface AssistantThreadMessage {
@@ -465,11 +466,10 @@ export class AssistantClient {
         const excerpt = $el.find(".excerpt").text().trim();
         const id = $el.attr("data-code") || "";
 
-        if (!threadMap[currentHeader]) {
-          threadMap[currentHeader] = [];
-        }
+        const threadsForHeader =
+          threadMap[currentHeader] ?? (threadMap[currentHeader] = []);
 
-        threadMap[currentHeader].push({
+        threadsForHeader.push({
           id,
           title,
           excerpt,
@@ -497,12 +497,27 @@ export function parseMetadata(html: string): Record<string, string> {
 
 export function parseReferencesHtml(html: string): Citation[] {
   const $ = cheerio.load(html);
-  return $("ol[data-ref-list] > li > a[href]")
-    .map((_, el) => ({
-      url: $(el).attr("href") || "",
-      title: $(el).text() || "",
-    }))
-    .get();
+  const citations: Citation[] = [];
+  $("ol[data-ref-list] > li").each((_, el) => {
+    const anchor = $(el).find("a[href]").first();
+
+    const url = anchor.length ? anchor.attr("href") ?? "" : "";
+    const title = anchor.length ? anchor.text() : "";
+
+    let contribution: number | undefined;
+    const fullText = $(el).text();
+    const match = fullText.match(/(\d+(?:\.\d+)?)%/);
+    if (match) {
+      contribution = Number(match[1]);
+    }
+
+    const citation: Citation = { url, title };
+    if (typeof contribution === "number") {
+      citation.contribution = contribution;
+    }
+    citations.push(citation);
+  });
+  return citations;
 }
 
 async function extractModelInfoDescription(
@@ -529,7 +544,8 @@ async function extractModelInfoDescription(
     },
   });
   await rewriter.transform(new Response(html)).text();
-  return firstParagraphText?.trim() ?? null;
+  const normalized = (firstParagraphText ?? "").trim();
+  return normalized.length > 0 ? normalized : null;
 }
 function decodeHTMLEntities(text: string): string {
   const entities: Record<string, string> = {
@@ -540,8 +556,5 @@ function decodeHTMLEntities(text: string): string {
     "&gt;": ">",
     "&nbsp;": " ",
   };
-  return text.replace(
-    /&#39;|&quot;|&amp;|&lt;|&gt;|&nbsp;/g,
-    (match) => entities[match],
-  );
+  return text.replace(/&#39;|&quot;|&amp;|&lt;|&gt;|&nbsp;/g, (match) => entities[match] ?? match);
 }
