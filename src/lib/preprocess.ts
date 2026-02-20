@@ -68,8 +68,3 @@ export async function convertDetailsToBlockquote(
   const response = new Response(html);
   return await rewriter.transform(response).text();
 }
-
-// Usage with your sample:
-const rawHtml = `your_html_string_here`;
-const result = await convertDetailsToBlockquote(rawHtml);
-console.log(result);
