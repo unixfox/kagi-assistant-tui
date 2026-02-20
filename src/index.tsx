@@ -128,12 +128,6 @@ function App({ renderer }: { renderer: CliRenderer }) {
     const modelShortcut = ctrl && name === "p";
     const webSearchShortcut = ctrl && name === "o";
 
-    if (name === "c" && ctrl) {
-      renderer.stop();
-      process.exit(0);
-      return;
-    }
-
     if (name === "escape" || (name === "x" && ctrl)) {
       setShowModelSelectorModal(false);
       setMessageBarFocused(false);
