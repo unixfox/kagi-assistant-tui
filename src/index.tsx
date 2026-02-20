@@ -35,6 +35,9 @@ export interface AppContextProps {
   messageBarFocused: boolean;
   setMessageBarFocused: Dispatch<SetStateAction<boolean>>;
 
+  withInternet: boolean;
+  setWithInternet: Dispatch<SetStateAction<boolean>>;
+
   showModelSelectorModal: boolean;
   setShowModelSelectorModal: Dispatch<SetStateAction<boolean>>;
 
@@ -43,6 +46,9 @@ export interface AppContextProps {
 
   messagesBoxFocused: boolean;
   setMessagesBoxFocused: Dispatch<SetStateAction<boolean>>;
+
+  searchFocused: boolean;
+  setSearchFocused: Dispatch<SetStateAction<boolean>>;
 
   messages: AssistantThreadMessage[];
   setMessages: Dispatch<SetStateAction<AssistantThreadMessage[]>>;
@@ -72,11 +78,12 @@ function App({ renderer }: { renderer: CliRenderer }) {
   const [screen, setScreen] = useState(Screen.Pending);
   const [client, setClient] = useState<AssistantClient | null>(null);
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
-  const [messageBarFocused, setMessageBarFocused] = useState(false);
+  const [messageBarFocused, setMessageBarFocused] = useState(true);
   const [showModelSelectorModal, setShowModelSelectorModal] = useState(false);
   const [selectedProfile, setSelectedProfile] =
     useState<AssistantProfile | null>(null);
   const [messagesBoxFocused, setMessagesBoxFocused] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [messages, setMessages] = useState<AssistantThreadMessage[]>([]);
   const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
     "New Chat",
@@ -87,6 +94,7 @@ function App({ renderer }: { renderer: CliRenderer }) {
     string,
     AssistantThread[]
   > | null>(null);
+  const [withInternet, setWithInternet] = useState(true);
 
   const checkStateForScreen = async () => {
     const keychain = new Keychain();
@@ -116,7 +124,15 @@ function App({ renderer }: { renderer: CliRenderer }) {
   }, []);
 
   useKeyboard((key) => {
-    const { name, ctrl, shift } = key;
+    const { name, ctrl, shift, meta, option } = key;
+    const modelShortcut = ctrl && name === "p";
+    const internetShortcut = ctrl && name === "o";
+
+    if (name === "c" && ctrl) {
+      renderer.stop();
+      process.exit(0);
+      return;
+    }
 
     if (name === "escape" || (name === "x" && ctrl)) {
       setShowModelSelectorModal(false);
@@ -125,8 +141,8 @@ function App({ renderer }: { renderer: CliRenderer }) {
       return;
     }
 
-    if (name === "m" && ctrl) {
-      setShowModelSelectorModal((val) => !val);
+    if (modelShortcut) {
+      setShowModelSelectorModal(true);
       setMessageBarFocused(false);
       setMessagesBoxFocused(false);
       return;
@@ -203,6 +219,10 @@ function App({ renderer }: { renderer: CliRenderer }) {
             setCurrentThreadLoading,
             threads,
             setThreads,
+            withInternet,
+            setWithInternet,
+            searchFocused,
+            setSearchFocused,
           }}
         >
           <MainScreen />
@@ -214,7 +234,11 @@ function App({ renderer }: { renderer: CliRenderer }) {
 
 const renderer = await createCliRenderer({
   targetFps: 120,
-  exitOnCtrlC: false,
+  exitOnCtrlC: true,
+  useKittyKeyboard: {
+    disambiguate: true,
+    alternateKeys: true,
+  },
 });
 renderer.on("selection", (selection) => {
   copyToClipboard(selection?.getSelectedText() ?? "");

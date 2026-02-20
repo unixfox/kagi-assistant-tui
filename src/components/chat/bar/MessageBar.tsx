@@ -5,6 +5,7 @@ import * as cheerio from "cheerio";
 import { prefs, useAppContext } from "../../..";
 import {
   AssistantThreadMessageRole,
+  type AssistantProfile,
   type KagiPromptRequest,
   type AssistantThreadMessage,
   type Citation,
@@ -56,6 +57,16 @@ interface MessageBarAttachment {
   thumbnailPath: string;
 }
 
+const DEFAULT_PROFILE: AssistantProfile = {
+  id: "",
+  name: "Quick",
+  description: "Default quick profile",
+  avatar: "",
+  color: "",
+  family: "Kagi",
+  model: "ki_quick",
+};
+
 const MessageBar = () => {
   const textareaRef = useRef<any>(null);
   const currentThreadIdRef = useRef<string | null>(null);
@@ -65,6 +76,8 @@ const MessageBar = () => {
     messageBarFocused,
     setShowModelSelectorModal,
     selectedProfile,
+    withInternet,
+    setWithInternet,
     setCurrentThreadTitle,
     setCurrentThreadId,
     setMessages,
@@ -75,8 +88,6 @@ const MessageBar = () => {
   } = useAppContext();
   const messagesRef = useRef(messages);
   const selectedProfileRef = useRef(selectedProfile);
-
-  const [withInternet, setWithInternet] = useState(false);
 
   const [attachments, setAttachments] = useState<MessageBarAttachment[]>([]);
 
@@ -110,12 +121,12 @@ const MessageBar = () => {
     setAttachments([]);
 
     // 1. Setup IDs
-    let messageId = crypto.randomUUID();
-    let inProgressId = `${messageId}.reply`;
-    let currentInProgressId = inProgressId; // Mutable tracker for ID updates during stream
+    let messageId: string = crypto.randomUUID();
+    let inProgressId: string = `${messageId}.reply`;
+    let currentInProgressId: string = inProgressId; // Mutable tracker for ID updates during stream
 
     const messages = messagesRef.current;
-    const selectedProfile = selectedProfileRef.current;
+    const selectedProfile = selectedProfileRef.current ?? DEFAULT_PROFILE;
     // Get context from previous messages
     const assistantMessages = messages.filter(
       (m: AssistantThreadMessage) =>
@@ -123,12 +134,12 @@ const MessageBar = () => {
     );
     const latestAssistantMessageId =
       assistantMessages.length > 0
-        ? assistantMessages[assistantMessages.length - 1].id
+        ? assistantMessages[assistantMessages.length - 1]!.id
         : null;
 
     const lastMessage =
       messages.length > 0 ? messages[messages.length - 1] : null;
-    const branchIds = lastMessage?.branchIds || [];
+    const branchIds = lastMessage?.branchIds ?? [];
     const branchId =
       branchIds.length > 0 ? branchIds[branchIds.length - 1] : null;
 
@@ -165,10 +176,10 @@ const MessageBar = () => {
         branch_id: branchId || "00000000-0000-0000-4000-000000000000",
       },
       profile: {
-        id: selectedProfile?.id || null,
+        id: selectedProfile.id || null,
         internet_access: withInternetRef.current,
         lens_id: null,
-        model: selectedProfile?.model || "Kagi Assistant", // Fallback
+        model: selectedProfile.model || DEFAULT_PROFILE.model,
         personalizations: false,
       },
       threads: currentThreadIdRef.current
@@ -382,14 +393,14 @@ const MessageBar = () => {
   };
 
   useKeyboard((key) => {
-    if (key.name === "o" && key.ctrl) {
+    if (key.name === "n" && key.ctrl) {
       newChat();
       return;
     }
 
     if (!messageBarFocused) return;
 
-    if (key.name === "c" && key.ctrl) {
+    if (key.name === "u" && key.ctrl) {
       if (textareaRef.current) {
         textareaRef.current.clear();
       }
@@ -404,10 +415,6 @@ const MessageBar = () => {
     if (key.name === "v" && key.ctrl) {
       handlePasteImage();
       return;
-    }
-
-    if (key.name === "s" && key.ctrl) {
-      setWithInternet((i) => !i);
     }
   });
 
@@ -433,6 +440,9 @@ const MessageBar = () => {
     textareaRef.current?.clear();
   };
 
+  const displayProfile = selectedProfile ?? DEFAULT_PROFILE;
+  const usingDefaultProfile = !selectedProfile;
+
   return (
     <box marginBottom={2} flexDirection="column">
       <box width="100%" flexDirection="row" gap={1} height={1}>
@@ -446,6 +456,7 @@ const MessageBar = () => {
           >
             <text fg="black">
               <strong>❄ Internet</strong>
+              <span> (ctrl+o)</span>
             </text>
           </box>
         )}
@@ -499,18 +510,32 @@ const MessageBar = () => {
         width="100%"
         marginBottom={1}
       >
-        <box width="90%">
-          {selectedProfile && (
-            <text>
-              <strong>Model</strong>:{selectedProfile?.family}{" "}
-              {selectedProfile?.name}{" "}
-              <span fg={colors.textSecondary}>(ctrl+m)</span>
-            </text>
-          )}
+        <box width="90%" flexDirection="column">
+          <text>
+            <strong>Model</strong>:{displayProfile.family} {displayProfile.name}
+            {usingDefaultProfile && (
+              <span fg={colors.textSecondary}> (default)</span>
+            )}{" "}
+            <span fg={colors.textSecondary}>(ctrl+p)</span>
+          </text>
+          <text>
+            <strong>Web Search</strong>:{" "}
+            <span fg={withInternet ? "#74c69d" : colors.textSecondary}>
+              {withInternet ? "On" : "Off"}
+            </span>
+            {" "}
+            <span fg={colors.textSecondary}>(ctrl+o)</span>
+          </text>
+          <text>
+            <strong>Messages</strong>: focus with
+            {" "}
+            <span fg={colors.textSecondary}>(F6)</span>
+          </text>
         </box>
         <box flexDirection="row" justifyContent="flex-end">
           <text>
-            Paste <span fg={colors.textSecondary}>(ctrl+v)</span>
+            Paste <span fg={colors.textSecondary}>(ctrl+v)</span> · Clear
+            <span fg={colors.textSecondary}> (ctrl+u)</span>
           </text>
         </box>
       </box>

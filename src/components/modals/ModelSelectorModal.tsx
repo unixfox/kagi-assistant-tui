@@ -7,8 +7,13 @@ import { removeLastWord } from "../../lib/manip";
 import { colors } from "../../lib/theme";
 const MAX_RECENT_MODELS = 5;
 const ModelSelectorModal = ({ show }: { show: boolean }) => {
-  const { client, setSelectedProfile, setShowModelSelectorModal } =
-    useAppContext();
+  const {
+    client,
+    setSelectedProfile,
+    setShowModelSelectorModal,
+    setMessageBarFocused,
+    setSearchFocused,
+  } = useAppContext();
   const [models, setModels] = useState<AssistantProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -139,6 +144,8 @@ const ModelSelectorModal = ({ show }: { show: boolean }) => {
     const selected = models.find((m) => m.name === option.name) ?? null;
     setSelectedProfile(selected);
     setShowModelSelectorModal(false);
+    setMessageBarFocused(true);
+    setSearchFocused(false);
     prefs.set("selected_profile", JSON.stringify(selected));
     const recentModels = prefs.get<string[]>("recent_models", []);
     const updatedRecent = [

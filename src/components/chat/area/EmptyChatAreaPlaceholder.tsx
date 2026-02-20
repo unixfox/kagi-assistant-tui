@@ -1,12 +1,12 @@
 import { colors } from "../../../lib/theme";
 
 const SHORTCUTS: { [key: string]: string[] } = {
-  "new chat": ["ctrl", "g"],
-  "select model": ["ctrl", "m"],
+  "new chat": ["ctrl", "n"],
+  "select model": ["ctrl", "p"],
   "search chats": ["ctrl", "f"],
-  "focus messages box": ["ctrl", "g"],
+  "focus messages box": ["f6"],
   "toggle sidebar": ["ctrl", "b"],
-  "focus input": ["/"],
+  "focus input": ["ctrl", "t"],
 };
 
 const EmptyChatAreaPlaceholder = () => {

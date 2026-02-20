@@ -26,6 +26,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
     setCurrentThreadId,
     currentThreadId,
     messageBarFocused,
+    setMessageBarFocused,
     showModelSelectorModal,
     messagesBoxFocused,
     setMessages,
@@ -202,6 +203,7 @@ const ChatSidebar = ({ show }: { show: boolean }) => {
         setSearchQuery={setSearchQuery}
         searchFocused={searchFocused}
         setSearchFocused={setSearchFocused}
+        setMessageBarFocused={setMessageBarFocused}
         onSubmit={() => {
           // Focus first result when submit is pressed
           const filteredFlatThreads = filteredThreads

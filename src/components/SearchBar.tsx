@@ -1,4 +1,4 @@
-import { useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { useKeyboard } from "@opentui/react";
 import { removeLastWord } from "../lib/manip";
 import { colors } from "../lib/theme";
@@ -7,7 +7,8 @@ interface SearchBarProps {
   searchQuery: string;
   setSearchQuery: Dispatch<SetStateAction<string>>;
   searchFocused: boolean;
-  setSearchFocused: (focused: boolean) => void;
+  setSearchFocused: Dispatch<SetStateAction<boolean>>;
+  setMessageBarFocused: Dispatch<SetStateAction<boolean>>;
   onSubmit?: () => void;
 }
 
@@ -16,18 +17,34 @@ const SearchBar = ({
   setSearchQuery,
   searchFocused,
   setSearchFocused,
+  setMessageBarFocused,
   onSubmit,
 }: SearchBarProps) => {
   const keyHandledRef = useRef(false);
+  const inputRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+    if (searchFocused) {
+      inputRef.current.focus?.();
+    } else {
+      inputRef.current.blur?.();
+    }
+  }, [searchFocused]);
 
   useKeyboard((key) => {
     if (key.ctrl && key.name === "f") {
-      setSearchFocused(true);
+      setSearchFocused((prev) => {
+        const next = !prev;
+        setMessageBarFocused(!next);
+        return next;
+      });
       return;
     }
 
     if (searchFocused && key.name === "escape") {
       setSearchFocused(false);
+      setMessageBarFocused(true);
       return;
     }
 
@@ -57,6 +74,7 @@ const SearchBar = ({
       }}
     >
       <input
+        ref={inputRef}
         placeholder=" 🔍 Search threads..."
         value={searchQuery}
         onInput={(v) => {
